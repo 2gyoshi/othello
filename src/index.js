@@ -92,8 +92,6 @@ class Board extends React.Component {
   isLimit(targetSquare, direction){
     let val = false;
     let limits = this.getLimitsByDir(direction);
-    console.log(direction);
-    console.dir(limits);
     for(let i=0; i<limits.length; i++){
       if(limits[i].indexOf(targetSquare) >= 0){
         val = true;
