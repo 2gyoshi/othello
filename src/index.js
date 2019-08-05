@@ -12,6 +12,12 @@ function Square(props) {
   );
 }
 
+function Stone(props) {
+  return (
+    <div className={props.value}></div>
+  );
+}
+
 class Board extends React.Component {
   constructor(props) {
     super(props);
@@ -32,45 +38,95 @@ class Board extends React.Component {
     };
   }
 
-  getLimit(i){
-    let col = i;
-    while(col >= 8){
-      col += -8;
-    }
-    let min = i - col;
-    let max = min + 7;
-    const limit = {
-      min: min,
-      max: max,
-    }
-    return limit;
+  getDirections(){
+    return [-9, -8, -7, -1, 1, 7, 8, 9];
   }
 
-  canPutStone(i, direction, isFirstCall, min, max){
+  getLimits(){
+    return {
+      'top'     : [0,  1,  2,  3,  4,  5,  6,  7 ],
+      'left'    : [0,  8,  16, 24, 32, 40, 48, 56],
+      'right'   : [7,  15, 23, 31, 39, 47, 55, 63],
+      'bottom'  : [56, 57, 58, 59, 60, 61, 62, 63],
+    };
+  }
+
+  getLimitsByDir(direction){
+    let limits = this.getLimits();
+    let val = [];
+    switch(direction){
+      case -9 :
+        val.push(limits.top);
+        val.push(limits.left);
+        break;
+      case -8 :
+        val.push(limits.top);
+        break;
+      case -7 :
+        val.push(limits.top);
+        val.push(limits.right);
+        break;
+      case -1 :
+        val.push(limits.left);
+        break;
+      case 1 :
+        val.push(limits.right);
+        break;
+      case 7 :
+        val.push(limits.bottom);
+        val.push(limits.left);
+        break;
+      case 8 :
+        val.push(limits.bottom);
+        break;
+      case 9 :
+        val.push(limits.bottom);
+        val.push(limits.right);
+        break;
+      default :
+        break;
+    }
+    return val;
+  }
+
+  isLimit(targetSquare, direction){
+    let val = false;
+    let limits = this.getLimitsByDir(direction);
+    console.log(direction);
+    console.dir(limits);
+    for(let i=0; i<limits.length; i++){
+      if(limits[i].indexOf(targetSquare) >= 0){
+        val = true;
+      }
+    }
+    return val;
+  }
+
+  canPutStone(targetSquare, direction, calledCount){
     let ret = false;
     const squares = this.state.squares.slice();
     const turn = this.state.xIsNext ? 'bstone' : 'wstone';
-    if(i >= min && i <= max){
-      i += direction;
-      switch(squares[i]){
+    if(this.isLimit(targetSquare, direction) === false){
+      targetSquare += direction;
+      switch(squares[targetSquare]){
         case '' :
           ret = false;
           break;
         case turn :
-          ret = isFirstCall ? false : true;
+          ret = (calledCount === 1) ? false : true;
           break;
         default :
-          ret = this.canPutStone(i, direction, false, min, max);
+          ret = this.canPutStone(targetSquare, direction, ++calledCount);
           break;
       }
     }
     return ret;
   }
 
-  reverseSones(i, direction, squares, min, max){
+  reverseSones(i, direction, squares){
     const turn = this.state.xIsNext ? 'bstone' : 'wstone';
     squares[i] = turn;
-    while(i　>= min && i <= max){
+    while(this.isLimit(i, direction) === false){
       squares[i] = turn;
       i += direction;
       if(squares[i] === turn){
@@ -80,25 +136,18 @@ class Board extends React.Component {
     return squares;
   }
 
-  handleClick(i) {
+  handleClick(clickedButton) {
     let squares = this.state.squares.slice();
     let xIsNext = this.state.xIsNext;
     let message = 'You cannot put stone there.';
     let flg = false;
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(squares) || squares[clickedButton]) {
       return;
     } 
-    const directions = [-9, -8, -7, -1, 1, 7, 8, 9];
-    for(let j=0; j<directions.length; j++){
-      let min = 0;
-      let max = 63;
-      if(directions[j] === 1 || directions[j] === -1){
-        const limit = this.getLimit(i)
-        min = limit.min;
-        max = limit.max;
-      }
-      if(this.canPutStone(i, directions[j], true, min, max)){
-        squares = this.reverseSones(i, directions[j], squares, min, max);
+    const directions = this.getDirections();
+    for(let i=0; i<directions.length; i++){
+      if(this.canPutStone(clickedButton, directions[i], 1)){
+        squares = this.reverseSones(clickedButton, directions[i], squares);
         flg = true;
       }
     }
@@ -118,7 +167,6 @@ class Board extends React.Component {
       xIsNext: !this.state.xIsNext,
     })
   }
-
 
   createSquares(i){
     return (
@@ -160,7 +208,6 @@ class Board extends React.Component {
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'black' : 'white');
     }
-
     return (
       <div>
         <div className="status">{status}</div>
