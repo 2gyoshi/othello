@@ -38,24 +38,19 @@ class Game extends React.Component {
         super(props);
 
         const squares = Array(64).fill(null);
-        squares[27] = CONFIG.blackStone;
-        squares[28] = CONFIG.whiteStone;
-        squares[35] = CONFIG.whiteStone;
-        squares[36] = CONFIG.blackStone;
+        squares[27] = CONFIG.whiteStone;
+        squares[28] = CONFIG.blackStone;
+        squares[35] = CONFIG.blackStone;
+        squares[36] = CONFIG.whiteStone;
 
         this.state = {
-            history: [{
-                squares: squares
-            }],
-            stepNumber: 0,
+            squares: squares,
             xIsNext: true,
         };
     }
 
     handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const squares = current.squares.slice();
+        const squares = this.state.squares.slice();
 
         if(squares[i]) return;
 
@@ -68,41 +63,18 @@ class Game extends React.Component {
         target.forEach(e => squares[e] = turn);
 
         this.setState({
-            history: history.concat([{
-                squares: squares
-            }]),
-            stepNumber: history.length,
+            squares: squares,
             xIsNext: next,
         });
     }
 
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0,
-        });
-    }
-
     render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-
-
-        const moves = history.map((step, move) => {
-            const desc = move ?
-                'Go to move #' + move :
-                'Go to game start';
-            return (
-                <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                </li>
-            );
-        });
-
         let winner = null;
         let status = null;
-        const squares = current.squares.slice();
+
+        const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
+
         if(turn === null) {
             winner  = calculateWinner(squares);
         }
@@ -119,7 +91,7 @@ class Game extends React.Component {
             <div className="game">
                 <div className="game-board">
                     <Board 
-                     squares={current.squares}
+                     squares={squares}
                      onClick={i => this.handleClick(i)}
                     />
                 </div>
@@ -127,7 +99,6 @@ class Game extends React.Component {
                     <div>{status}</div>
                     <div>{`black: ${stoneCount.black}`}</div>
                     <div>{`white: ${stoneCount.white}`}</div>
-                    <ol>{moves}</ol>
                 </div>
             </div>
         );
@@ -147,6 +118,15 @@ function getTurn(isBlackTurn, squares) {
     return null;
 }
 
+function calculateWinner(squares) {
+    const black = CONFIG.blackStone;
+    const white = CONFIG.whiteStone;
+    const stoneCount = getStoneCount(squares);
+    if(stoneCount.black === stoneCount.white) return 'Draw';
+    if(stoneCount.black > stoneCount.white) return black;
+    if(stoneCount.black < stoneCount.white) return white;
+}
+
 function getStoneCount(squares) {
     const blackStone = CONFIG.blackStone;
     const whiteStone = CONFIG.whiteStone;
@@ -164,14 +144,6 @@ function getStoneCount(squares) {
     };
 } 
 
-function calculateWinner(squares) {
-    const black = CONFIG.blackStone;
-    const white = CONFIG.whiteStone;
-    const stoneCount = getStoneCount(squares);
-    if(stoneCount.black === stoneCount.white) return 'Draw';
-    if(stoneCount.black > stoneCount.white) return black;
-    if(stoneCount.black < stoneCount.white) return white;
-}
 
 function getEnableSquares(stone, squares) {
     const enableSquares = new Array();
