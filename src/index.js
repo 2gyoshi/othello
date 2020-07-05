@@ -56,19 +56,23 @@ class Game extends React.Component {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
-        if(calculateWinner(squares) || squares[i]) return;
 
-        const stone  = this.state.xIsNext ? CONFIG.blackStone : CONFIG.whiteStone;
-        const target = getReverseTarget(i, stone, squares);
+        if(squares[i]) return;
+
+        const turn = getTurn(this.state.xIsNext, squares);
+        const next = turn !== CONFIG.blackStone;
+        if(turn === null) return;
+
+        const target = getReversibleSquares(i, turn, squares);
         if(target.length === 0) return;
-        target.forEach(e => squares[e] = stone);
+        target.forEach(e => squares[e] = turn);
 
         this.setState({
             history: history.concat([{
                 squares: squares
             }]),
             stepNumber: history.length,
-            xIsNext: !this.state.xIsNext,
+            xIsNext: next,
         });
     }
 
@@ -82,7 +86,7 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner  = calculateWinner(current.squares);
+
 
         const moves = history.map((step, move) => {
             const desc = move ?
@@ -95,12 +99,21 @@ class Game extends React.Component {
             );
         });
 
-        let status;
-        if(winner) {
-            status = 'Winner' + winner;
-        } else {
-            status = 'Next player: ' + (this.state.xIsNext ? CONFIG.blackStone : CONFIG.whiteStone);
+        let winner = null;
+        let status = null;
+        const squares = current.squares.slice();
+        const turn = getTurn(this.state.xIsNext, squares);
+        if(turn === null) {
+            winner  = calculateWinner(squares);
         }
+
+        if(winner) {
+            status = 'Result:' + winner;
+        } else {
+            status = 'Next player: ' + turn;
+        }
+
+        const stoneCount = getStoneCount(squares);
 
         return (
             <div className="game">
@@ -112,6 +125,8 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
+                    <div>{`black: ${stoneCount.black}`}</div>
+                    <div>{`white: ${stoneCount.white}`}</div>
                     <ol>{moves}</ol>
                 </div>
             </div>
@@ -119,7 +134,58 @@ class Game extends React.Component {
     }
 }
 
-function getReverseTarget(i, stone, squares) {
+function getTurn(isBlackTurn, squares) {
+    let enableSquares = new Array();
+    const first  = isBlackTurn ? CONFIG.blackStone : CONFIG.whiteStone;
+    enableSquares = getEnableSquares(first, squares);
+    if(enableSquares.length > 0) return first; 
+
+    const second = !isBlackTurn ? CONFIG.blackStone : CONFIG.whiteStone;
+    enableSquares = getEnableSquares(second, squares);
+    if(enableSquares.length > 0) return second; 
+
+    return null;
+}
+
+function getStoneCount(squares) {
+    const blackStone = CONFIG.blackStone;
+    const whiteStone = CONFIG.whiteStone;
+    let blackStoneCount = 0;
+    let whiteStoneCount = 0;
+    for (let i = 0; i < squares.length; i++) {
+        if(squares[i] === null) continue;
+        if(squares[i] === blackStone) blackStoneCount++;
+        if(squares[i] === whiteStone) whiteStoneCount++;
+    }
+
+    return {
+        black: blackStoneCount,
+        white: whiteStoneCount
+    };
+} 
+
+function calculateWinner(squares) {
+    const black = CONFIG.blackStone;
+    const white = CONFIG.whiteStone;
+    const stoneCount = getStoneCount(squares);
+    if(stoneCount.black === stoneCount.white) return 'Draw';
+    if(stoneCount.black > stoneCount.white) return black;
+    if(stoneCount.black < stoneCount.white) return white;
+}
+
+function getEnableSquares(stone, squares) {
+    const enableSquares = new Array();
+    let reversibleSquares = new Array();
+    for (let i = 0; i < squares.length; i++) {
+        if(squares[i] !== null) continue;
+        reversibleSquares = getReversibleSquares(i, stone, squares);
+        if(reversibleSquares.length === 0) continue;
+        enableSquares.push(reversibleSquares);
+    }
+    return enableSquares;
+}
+
+function getReversibleSquares(i, stone, squares) {
     let result = new Array();
     let tmp = new Array();
     let count = 0;
@@ -134,20 +200,12 @@ function getReverseTarget(i, stone, squares) {
         while(true) {
             if(count === 0) {
                 const next = current + directions[k];
-                
-                if(squares[next] === null) {
-                    break;
-                };
-                
-                if(squares[next] === stone) {
-                    break;
-                };
+                if(squares[next] === null)  break;
+                if(squares[next] === stone) break;
             }
         
             if(count !== 0) {
-                if(squares[current] === null) {
-                    break;
-                };
+                if(squares[current] === null) break;
             }
 
             if(squares[current] === stone) {
@@ -205,26 +263,6 @@ function getLimit() {
         b:  b,
         br: br
     };
-}
-
-function calculateWinner(squares) {
-    // const lines = [
-    //   [0, 1, 2],
-    //   [3, 4, 5],
-    //   [6, 7, 8],
-    //   [0, 3, 6],
-    //   [1, 4, 7],
-    //   [2, 5, 8],
-    //   [0, 4, 8],
-    //   [2, 4, 6],
-    // ];
-    // for (let i = 0; i < lines.length; i++) {
-    //   const [a, b, c] = lines[i];
-    //   if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-    //     return squares[a];
-    //   }
-    // }
-    return null;
 }
 
 const CONFIG = {
