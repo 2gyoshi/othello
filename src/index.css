@@ -3,79 +3,77 @@ body {
     margin: 20px;
   }
   
-  ol, ul {
-    padding-left: 30px;
-  }
-  
-  .board {
-    display: flex;
-    flex-wrap: wrap;
-    width: 272px;
-    height: 272px;
-  }
-  
-  .status {
-    margin-bottom: 10px;
-  }
-  
-  .square {
-    background: #fff;
-    border: 1px solid #999;
-    float: left;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 34px;
-    height: 34px;
-    margin-right: -1px;
-    margin-top: -1px;
-    padding: 0;
-    text-align: center;
-    width: 34px;
-    position: relative;
-  }
+.board {
+  display: flex;
+  flex-wrap: wrap;
+  width: 272px;
+  height: 272px;
+}
 
-  .square.white::before {
-    content: "";
-    display: block;
-    background: #fff;
-    border: 1px solid #000;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);    
-  }
+.status {
+  margin-bottom: 10px;
+}
 
-  .square.black::before {
-    content: "";
-    display: block;
-    background: #000;
-    border: 1px solid #000;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);    
-  }
-  
-  .square:focus {
-    outline: none;
-  }
-  
-  .kbd-navigation .square:focus {
-    background: #ddd;
-  }
-  
-  .game {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .game-info {
-    margin-left: 20px;
-  }
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+  position: relative;
+  background: #008000;
+
+}
+
+.square.white::before {
+  content: "";
+  display: block;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);    
+}
+
+.square.black::before {
+  content: "";
+  display: block;
+  background: #000;
+  border: 1px solid #000;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);    
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
   
