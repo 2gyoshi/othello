@@ -20,7 +20,7 @@ class Board extends React.Component {
     }
 
     render() {
-        const list = new Array();
+        const list = [];
         for (let i = 0; i < 64; i++) {
             list.push(this.renderSquare(i));
         }
@@ -47,6 +47,27 @@ class Game extends React.Component {
             squares: squares,
             xIsNext: true,
         };
+
+        this.webSocket();
+    }
+    
+    webSocket() {
+        const self = this;
+        const socket = new WebSocket('ws://127.0.0.1:5001');
+
+        // サーバーにデータ送信する
+        socket.onopen = () => {
+            const squares = self.state.squares;
+            socket.send(JSON.stringify(squares));
+        }
+        
+        // サーバーからデータを受信する
+        socket.onmessage = e => {
+            const squares = JSON.parse(e.data);
+            this.setState({
+                squares: squares,
+            });
+        }
     }
 
     handleClick(i) {
@@ -61,11 +82,13 @@ class Game extends React.Component {
         const target = getReversibleSquares(i, turn, squares);
         if(target.length === 0) return;
         target.forEach(e => squares[e] = turn);
-
+        
         this.setState({
             squares: squares,
             xIsNext: next,
         });
+
+        this.webSocket();
     }
 
     render() {
@@ -76,7 +99,7 @@ class Game extends React.Component {
         const turn = getTurn(this.state.xIsNext, squares);
 
         if(turn === null) {
-            winner  = calculateWinner(squares);
+            winner = calculateWinner(squares);
         }
 
         if(winner) {
@@ -106,7 +129,7 @@ class Game extends React.Component {
 }
 
 function getTurn(isBlackTurn, squares) {
-    let enableSquares = new Array();
+    let enableSquares = [];
     const first  = isBlackTurn ? CONFIG.blackStone : CONFIG.whiteStone;
     enableSquares = getEnableSquares(first, squares);
     if(enableSquares.length > 0) return first; 
@@ -146,8 +169,8 @@ function getStoneCount(squares) {
 
 
 function getEnableSquares(stone, squares) {
-    const enableSquares = new Array();
-    let reversibleSquares = new Array();
+    const enableSquares = [];
+    let reversibleSquares = [];
     for (let i = 0; i < squares.length; i++) {
         if(squares[i] !== null) continue;
         reversibleSquares = getReversibleSquares(i, stone, squares);
@@ -158,8 +181,8 @@ function getEnableSquares(stone, squares) {
 }
 
 function getReversibleSquares(i, stone, squares) {
-    let result = new Array();
-    let tmp = new Array();
+    let result = [];
+    let tmp = [];
     let count = 0;
     let current = 0;
     const directions = getDirections();
@@ -167,7 +190,7 @@ function getReversibleSquares(i, stone, squares) {
     for(const k of Object.keys(directions)) {
         count = 0;
         current = i;
-        tmp = new Array();
+        tmp = [];
 
         while(true) {
             if(count === 0) {
