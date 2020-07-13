@@ -7,7 +7,7 @@ function Square(props) {
         <button className={`square ${props.value}`} onClick={props.onClick} />
     );
 }
-  
+
 class Board extends React.Component {
     renderSquare(i) {
         return (
@@ -46,28 +46,32 @@ class Game extends React.Component {
         this.state = {
             squares: squares,
             xIsNext: true,
-        };
+	};
 
-        this.webSocket();
+        this.webSocket({
+            squares: squares,
+            xIsNext: true,
+	});
     }
     
-    webSocket() {
-        const self = this;
-        const socket = new WebSocket('ws://127.0.0.1:5001');
+    webSocket(data) {
+        const io = window.io;
+	const socket = io.connect(window.location.host);
 
         // サーバーにデータ送信する
-        socket.onopen = () => {
-            const squares = self.state.squares;
-            socket.send(JSON.stringify(squares));
-        }
-        
+        socket.emit('message', JSON.stringify(data));
+
         // サーバーからデータを受信する
-        socket.onmessage = e => {
-            const squares = JSON.parse(e.data);
-            this.setState({
-                squares: squares,
-            });
-        }
+        socket.on('message', msg => this.recieve(msg));
+    }
+
+    recieve(msg) {
+        const data = JSON.parse(msg);
+	console.log(data);
+        this.setState({
+            squares: data.squares,
+            xIsNext: data.xIsNext,
+        });
     }
 
     handleClick(i) {
@@ -86,9 +90,12 @@ class Game extends React.Component {
         this.setState({
             squares: squares,
             xIsNext: next,
-        });
+	});
 
-        this.webSocket();
+        this.webSocket({
+            squares: squares,
+            xIsNext: next,
+	});
     }
 
     render() {
@@ -271,3 +278,4 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root')
 );
+
