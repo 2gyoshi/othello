@@ -120,22 +120,31 @@ class Game extends React.Component {
 
         return (
             <div className="game">
+
                 <div className="game-board">
+                    <div className="board-mark">
+                        <div className="mark lt"/>
+                        <div className="mark lb"/>
+                        <div className="mark rt"/>
+                        <div className="mark rb"/>
+                        <div/>
+                    </div>
+
                     <Board 
                      squares={squares}
                      onClick={i => this.handleClick(i)}
                     />
                 </div>
                 <div className="game-info">
-                    <div class="turn">{status}</div>
-                    <div class="count">
-                        <div class="count-black">
-                            <div class="stone black"/>
-                            <div class="num">{`x${blackCount}`}</div>
+                    <div className="turn">{status}</div>
+                    <div className="count">
+                        <div className="count-black">
+                            <div className="stone black"/>
+                            <div className="num">{`x${blackCount}`}</div>
                         </div>
-                        <div class="count-white">
-                            <div class="stone white"/>
-                            <div class="num">{`x${whiteCount}`}</div>
+                        <div className="count-white">
+                            <div className="stone white"/>
+                            <div className="num">{`x${whiteCount}`}</div>
                         </div>
                     </div>
                 </div>
