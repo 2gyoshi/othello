@@ -46,17 +46,17 @@ class Game extends React.Component {
         this.state = {
             squares: squares,
             xIsNext: true,
-	};
+        };
 
         this.webSocket({
             squares: squares,
             xIsNext: true,
-	});
+        });
     }
     
     webSocket(data) {
         const io = window.io;
-	const socket = io.connect(window.location.host);
+        const socket = io.connect(window.location.host);
 
         // サーバーにデータ送信する
         socket.emit('message', JSON.stringify(data));
@@ -67,7 +67,6 @@ class Game extends React.Component {
 
     recieve(msg) {
         const data = JSON.parse(msg);
-	console.log(data);
         this.setState({
             squares: data.squares,
             xIsNext: data.xIsNext,
@@ -90,12 +89,12 @@ class Game extends React.Component {
         this.setState({
             squares: squares,
             xIsNext: next,
-	});
+        });
 
         this.webSocket({
             squares: squares,
             xIsNext: next,
-	});
+        });
     }
 
     render() {
@@ -110,12 +109,14 @@ class Game extends React.Component {
         }
 
         if(winner) {
-            status = 'Result:' + winner;
+            status = 'Result: ' + winner;
         } else {
-            status = 'Next player: ' + turn;
+            status = 'Turn: ' + turn;
         }
 
         const stoneCount = getStoneCount(squares);
+        const blackCount = ('00' + stoneCount.black ).slice( -2 );
+        const whiteCount = ('00' + stoneCount.white ).slice( -2 );
 
         return (
             <div className="game">
@@ -126,9 +127,17 @@ class Game extends React.Component {
                     />
                 </div>
                 <div className="game-info">
-                    <div>{status}</div>
-                    <div>{`black: ${stoneCount.black}`}</div>
-                    <div>{`white: ${stoneCount.white}`}</div>
+                    <div class="turn">{status}</div>
+                    <div class="count">
+                        <div class="count-black">
+                            <div class="stone black"/>
+                            <div class="num">{`x${blackCount}`}</div>
+                        </div>
+                        <div class="count-white">
+                            <div class="stone white"/>
+                            <div class="num">{`x${whiteCount}`}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -173,7 +182,6 @@ function getStoneCount(squares) {
         white: whiteStoneCount
     };
 } 
-
 
 function getEnableSquares(stone, squares) {
     const enableSquares = [];
