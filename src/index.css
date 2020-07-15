@@ -133,30 +133,23 @@ body {
 
 .square:focus {
   outline: none;
-  box-shadow:
-    inset 1px 1px 0 yellow,
-    inset -1px -1px 0 yellow;
 }
 
 .game-info {
   display: flex;
   width: 300px;
   margin-top: 12px;
+  margin-bottom: 12px;
   font-size: 1.2rem;
 }
 
 .count {
   display: flex;
-  margin-left: auto;
 }
 
-.count-black {
+.game-info.p2 {
   display: flex;
-}
-
-.count-white {
-  display: flex;
-  margin-left: .5em;
+  justify-content: flex-end;
 }
 
 .stone {
@@ -176,6 +169,7 @@ body {
   background: #fff;
 }
 
-.num {
-  margin-left: .2em;
+.name {
+  margin-left: .5em;
+  margin-right: .5em;
 }

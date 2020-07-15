@@ -58,11 +58,21 @@ class Game extends React.Component {
         const io = window.io;
         const socket = io.connect(window.location.host);
 
+        const max = 99999;
+        const min = 10000;
+        this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
+        socket.emit('login', this.id);
+        socket.on('setTurn', msg => this.setTurn(msg));
+
         // サーバーにデータ送信する
         socket.emit('message', JSON.stringify(data));
 
         // サーバーからデータを受信する
         socket.on('message', msg => this.recieve(msg));
+    }
+
+    setTurn(msg) {
+        this.turn = msg[this.id];
     }
 
     recieve(msg) {
@@ -76,10 +86,11 @@ class Game extends React.Component {
     handleClick(i) {
         const squares = this.state.squares.slice();
 
-        if(squares[i]) return;
+        if(squares[i] !== null) return;
 
         const turn = getTurn(this.state.xIsNext, squares);
         const next = turn !== CONFIG.blackStone;
+        if(turn !== this.turn) return;
         if(turn === null) return;
 
         const target = getReversibleSquares(i, turn, squares);
@@ -92,6 +103,7 @@ class Game extends React.Component {
         });
 
         this.webSocket({
+            id: this.id,
             squares: squares,
             xIsNext: next,
         });
@@ -114,12 +126,20 @@ class Game extends React.Component {
             status = 'Turn: ' + turn;
         }
 
-        const stoneCount = getStoneCount(squares);
-        const blackCount = ('00' + stoneCount.black ).slice( -2 );
-        const whiteCount = ('00' + stoneCount.white ).slice( -2 );
+        // const stoneCount = getStoneCount(squares);
+        // const blackCount = ('00' + stoneCount.black).slice(-2);
+        // const whiteCount = ('00' + stoneCount.white).slice(-2);
 
         return (
             <div className="game">
+                <div className="game-info p2">
+                    <div className="name">Player2</div>
+                    <div className="count">
+                        <Stone value={this.turn}
+                         count={getStoneCount(squares, this.turn)}
+                        />
+                    </div>
+                </div>
 
                 <div className="game-board">
                     <div className="board-mark">
@@ -135,22 +155,26 @@ class Game extends React.Component {
                      onClick={i => this.handleClick(i)}
                     />
                 </div>
-                <div className="game-info">
-                    <div className="turn">{status}</div>
+
+                <div className="game-info p1">
                     <div className="count">
-                        <div className="count-black">
-                            <div className="stone black"/>
-                            <div className="num">{`x${blackCount}`}</div>
-                        </div>
-                        <div className="count-white">
-                            <div className="stone white"/>
-                            <div className="num">{`x${whiteCount}`}</div>
-                        </div>
+                        <Stone value={this.turn}
+                         count={getStoneCount(squares, this.turn)}
+                        />
                     </div>
+                    <div className="name">Player1</div>
                 </div>
             </div>
         );
     }
+}
+
+function Stone(props) {
+    return (
+        <div className={`stone ${props.value}`}>
+            {props.count}
+        </div>
+    );
 }
 
 function getTurn(isBlackTurn, squares) {
@@ -175,7 +199,7 @@ function calculateWinner(squares) {
     if(stoneCount.black < stoneCount.white) return white;
 }
 
-function getStoneCount(squares) {
+function getStoneCount(squares, stone) {
     const blackStone = CONFIG.blackStone;
     const whiteStone = CONFIG.whiteStone;
     let blackStoneCount = 0;
@@ -186,10 +210,12 @@ function getStoneCount(squares) {
         if(squares[i] === whiteStone) whiteStoneCount++;
     }
 
-    return {
+    const count = {
         black: blackStoneCount,
         white: whiteStoneCount
     };
+
+    return count[stone];
 } 
 
 function getEnableSquares(stone, squares) {
