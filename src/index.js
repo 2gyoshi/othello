@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
     return (
-        <button className={`square ${props.value}`} onClick={props.onClick} />
+        <button className={`square ${props.value} ${props.enable}`} onClick={props.onClick} />
     );
 }
 
@@ -14,6 +14,7 @@ class Board extends React.Component {
             <Square
              value={this.props.squares[i]}
              onClick={() => this.props.onClick(i)}
+             enable={this.props.enableSquares.includes(i) ? 'enable' : ''}
              key={i}
             />
         );
@@ -46,6 +47,7 @@ class Game extends React.Component {
         this.state = {
             squares: squares,
             xIsNext: true,
+            turn: ''
         };
 
         this.webSocket({
@@ -58,10 +60,14 @@ class Game extends React.Component {
         const io = window.io;
         const socket = io.connect(window.location.host);
 
-        const max = 99999;
-        const min = 10000;
-        this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
-        socket.emit('login', this.id);
+	if(!this.id) {
+            const max = 99999;
+            const min = 10000;
+            this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
+            socket.emit('login', this.id);
+	}
+
+	// サーバーに振り分けられた順番を設定する
         socket.on('setTurn', msg => this.setTurn(msg));
 
         // サーバーにデータ送信する
@@ -72,7 +78,9 @@ class Game extends React.Component {
     }
 
     setTurn(msg) {
-        this.turn = msg[this.id];
+        this.setState({
+            turn: msg[this.id]
+        });
     }
 
     recieve(msg) {
@@ -90,7 +98,7 @@ class Game extends React.Component {
 
         const turn = getTurn(this.state.xIsNext, squares);
         const next = turn !== CONFIG.blackStone;
-        if(turn !== this.turn) return;
+        if(turn !== this.state.turn) return;
         if(turn === null) return;
 
         const target = getReversibleSquares(i, turn, squares);
@@ -110,33 +118,37 @@ class Game extends React.Component {
     }
 
     render() {
-        let winner = null;
-        let status = null;
+        if(!this.state.turn) {
+            return (
+                <Dialog
+                 message="Waiting for opponent..."
+		 waiting="waiting"
+                />
+            );
+        }
 
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
 
-        if(turn === null) {
-            winner = calculateWinner(squares);
-        }
+	let result = '';
+	if(turn === null) result = 'Result: ' + calculateWinner(squares);
 
-        if(winner) {
-            status = 'Result: ' + winner;
-        } else {
-            status = 'Turn: ' + turn;
-        }
+        let enableSquares = getEnableSquares(this.state.turn, squares);
+	if(this.state.turn !== turn) enableSquares = [];
 
-        // const stoneCount = getStoneCount(squares);
-        // const blackCount = ('00' + stoneCount.black).slice(-2);
-        // const whiteCount = ('00' + stoneCount.white).slice(-2);
+        const p1 = this.state.turn;
+        const p1Count = getStoneCount(squares, p1);
+        const p2 = p1 === 'black' ? 'white' : 'black';
+        const p2Count = getStoneCount(squares, p2);
 
         return (
             <div className="game">
                 <div className="game-info p2">
                     <div className="name">Player2</div>
                     <div className="count">
-                        <Stone value={this.turn}
-                         count={getStoneCount(squares, this.turn)}
+                        <Stone
+                         value={p2}
+                         count={p2Count}
                         />
                     </div>
                 </div>
@@ -152,18 +164,21 @@ class Game extends React.Component {
 
                     <Board 
                      squares={squares}
+                     enableSquares={enableSquares}
                      onClick={i => this.handleClick(i)}
                     />
                 </div>
 
                 <div className="game-info p1">
                     <div className="count">
-                        <Stone value={this.turn}
-                         count={getStoneCount(squares, this.turn)}
+                        <Stone
+                         value={p1}
+                         count={p1Count}
                         />
                     </div>
                     <div className="name">Player1</div>
                 </div>
+		<div className="result">{result}</div>
             </div>
         );
     }
@@ -173,6 +188,14 @@ function Stone(props) {
     return (
         <div className={`stone ${props.value}`}>
             {props.count}
+        </div>
+    );
+}
+
+function Dialog(props) {
+    return (
+        <div className={`dialog ${props.waiting}`}>
+            {props.message}
         </div>
     );
 }
@@ -215,19 +238,24 @@ function getStoneCount(squares, stone) {
         white: whiteStoneCount
     };
 
+    if(!stone) {
+        return count;
+    }
+
     return count[stone];
 } 
 
 function getEnableSquares(stone, squares) {
-    const enableSquares = [];
+    let enableSquares = [];
     let reversibleSquares = [];
     for (let i = 0; i < squares.length; i++) {
         if(squares[i] !== null) continue;
         reversibleSquares = getReversibleSquares(i, stone, squares);
         if(reversibleSquares.length === 0) continue;
-        enableSquares.push(reversibleSquares);
+        enableSquares = enableSquares.concat(reversibleSquares);
     }
-    return enableSquares;
+
+    return enableSquares.filter(e => squares[e] === null);
 }
 
 function getReversibleSquares(i, stone, squares) {
