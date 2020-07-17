@@ -45,9 +45,11 @@ class Game extends React.Component {
         squares[36] = CONFIG.whiteStone;
 
         this.state = {
+            turn: '',
             squares: squares,
             xIsNext: true,
-            turn: ''
+	    isSpMode: false,
+	    canUseSp: true,
         };
 
         this.webSocket({
@@ -93,18 +95,21 @@ class Game extends React.Component {
 
     handleClick(i) {
         const squares = this.state.squares.slice();
+        const turn = getTurn(this.state.xIsNext, squares);
+
+        if(turn !== this.state.turn) return;
+        if(turn === null) return;
+	
+	if(this.state.isSpMode) return this.useSpecial(i);
 
         if(squares[i] !== null) return;
 
-        const turn = getTurn(this.state.xIsNext, squares);
-        const next = turn !== CONFIG.blackStone;
-        if(turn !== this.state.turn) return;
-        if(turn === null) return;
-
         const target = getReversibleSquares(i, turn, squares);
         if(target.length === 0) return;
+
         target.forEach(e => squares[e] = turn);
-        
+        const next = turn !== CONFIG.blackStone;
+
         this.setState({
             squares: squares,
             xIsNext: next,
@@ -114,6 +119,38 @@ class Game extends React.Component {
             id: this.id,
             squares: squares,
             xIsNext: next,
+        });
+    }
+
+    toggleMode() {
+	if(this.state.canUseSp === false) return;
+
+        const squares = this.state.squares.slice();
+        const turn = getTurn(this.state.xIsNext, squares);
+        if(turn !== this.state.turn) return;
+        if(turn === null) return;
+
+        this.setState({
+	    isSpMode: !this.state.isSpMode,
+	});
+	console.log(!this.state.isSpMode)
+    }
+
+    useSpecial(i) {
+        const squares = this.state.squares.slice();
+	squares[i] = null;
+
+	this.setState({
+	    squares: squares,
+            xIsNext: !this.state.xIsNext,
+            isSpMode: false,
+	    canUseSp: false,
+	});
+
+        this.webSocket({
+            id: this.id,
+	    squares: squares,
+            xIsNext: !this.state.xIsNext,
         });
     }
 
@@ -177,6 +214,11 @@ class Game extends React.Component {
                         />
                     </div>
                     <div className="name">Player1</div>
+		    <Toggle
+		     mode={this.state.isSpMode ? 'special' : 'normal'}
+		     value="SP"
+		     onClick={() => this.toggleMode()}
+		    />
                 </div>
 		<div className="result">{result}</div>
             </div>
@@ -197,6 +239,14 @@ function Dialog(props) {
         <div className={`dialog ${props.waiting}`}>
             {props.message}
         </div>
+    );
+}
+
+function Toggle(props) {
+    return (
+        <button className={`toggle ${props.mode}`} onClick={props.onClick}>
+	    {props.value}
+        </button>
     );
 }
 
