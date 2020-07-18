@@ -4,6 +4,17 @@
   padding: 0;
 }
 
+.button {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+
 html, body {
   width: 100%;
   height: 100%;
@@ -129,10 +140,6 @@ body {
   transform: translate(-50%, -50%);
 }
 
-.square:focus {
-  outline: none;
-}
-
 .square.enable::before {
   content: "";
   display: block;
@@ -143,6 +150,24 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.square.block::before,
+.square.block::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: #000;
+  position: absolute;
+}
+
+.square.block::before {
+  transform: rotate(-45deg);
+}
+
+.square.block::after {
+  transform: rotate(45deg);
 }
 
 .game-info {
@@ -215,3 +240,29 @@ body {
   font-size: 1.2rem;
 }
 
+.toggle {
+  width: 45px;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  position: relative;
+}
+
+.toggle.special {
+  animation: waiting .3s ease-in-out 0s infinite alternate;
+}
+
+.character-set {
+  display: flex;
+  width: 300px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.character {
+    width: 76px;
+    height: 76px;
+    margin: 12px;
+}

@@ -45,11 +45,12 @@ class Game extends React.Component {
         squares[36] = CONFIG.whiteStone;
 
         this.state = {
-            turn: '',
-            squares: squares,
-            xIsNext: true,
+	    color: '',
+	    spName: '',
 	    isSpMode: false,
 	    canUseSp: true,
+            xIsNext: true,
+            squares: squares,
         };
 
         this.webSocket({
@@ -81,7 +82,7 @@ class Game extends React.Component {
 
     setTurn(msg) {
         this.setState({
-            turn: msg[this.id]
+            color: msg[this.id],
         });
     }
 
@@ -96,11 +97,19 @@ class Game extends React.Component {
     handleClick(i) {
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
+        let next = turn !== CONFIG.blackStone;
 
-        if(turn !== this.state.turn) return;
+        if(turn !== this.state.color) return;
         if(turn === null) return;
 	
-	if(this.state.isSpMode) return this.useSpecial(i);
+	if(this.state.isSpMode) {
+	    if(this.state.spName === 'reverse') return this.useSpecial(i);
+	    if(this.state.spName === 'block') return this.useSpecial(i);
+	    if(this.state.spName === 'double') {
+                next = this.state.xIsNext;
+	    	this.useSpecial(i);
+	    }
+	}
 
         if(squares[i] !== null) return;
 
@@ -108,7 +117,6 @@ class Game extends React.Component {
         if(target.length === 0) return;
 
         target.forEach(e => squares[e] = turn);
-        const next = turn !== CONFIG.blackStone;
 
         this.setState({
             squares: squares,
@@ -127,22 +135,37 @@ class Game extends React.Component {
 
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
-        if(turn !== this.state.turn) return;
+        if(turn !== this.state.color) return;
         if(turn === null) return;
 
         this.setState({
 	    isSpMode: !this.state.isSpMode,
 	});
-	console.log(!this.state.isSpMode)
     }
 
     useSpecial(i) {
+	let next = ''; 
         const squares = this.state.squares.slice();
-	squares[i] = null;
+	if(this.state.spName === 'reverse') {
+	    if(squares[i] === null) return;
+	    if(squares[i] === 'block') return;
+	    next = !this.state.xIsNext; 
+	    squares[i] = squares[i] === 'black' ? 'white' : 'black';
+	}
+
+	if(this.state.spName === 'double') {
+	    next = this.state.xIsNext; 
+	}
+	
+	if(this.state.spName === 'block') {
+	    if(squares[i] !== null) return;
+	    next = !this.state.xIsNext; 
+	    squares[i] = 'block';
+	}
 
 	this.setState({
 	    squares: squares,
-            xIsNext: !this.state.xIsNext,
+            xIsNext: next,
             isSpMode: false,
 	    canUseSp: false,
 	});
@@ -150,12 +173,28 @@ class Game extends React.Component {
         this.webSocket({
             id: this.id,
 	    squares: squares,
-            xIsNext: !this.state.xIsNext,
+            xIsNext: next,
         });
     }
 
+    setSpName(spName) {
+	this.setState({
+	    spName: spName,
+	});
+    }
+
     render() {
-        if(!this.state.turn) {
+	if(!this.state.spName) {
+	    return (
+		<div className="character-set">
+		    <Character spName="reverse" onClick={() => this.setSpName("reverse")} />
+		    <Character spName="double" onClick={() => this.setSpName("double")} />
+		    <Character spName="block" onClick={() => this.setSpName("block")} />
+		</div>
+	    );
+	}
+
+        if(!this.state.color) {
             return (
                 <Dialog
                  message="Waiting for opponent..."
@@ -170,10 +209,10 @@ class Game extends React.Component {
 	let result = '';
 	if(turn === null) result = 'Result: ' + calculateWinner(squares);
 
-        let enableSquares = getEnableSquares(this.state.turn, squares);
-	if(this.state.turn !== turn) enableSquares = [];
+        let enableSquares = getEnableSquares(this.state.color, squares);
+	if(this.state.color !== turn) enableSquares = [];
 
-        const p1 = this.state.turn;
+        const p1 = this.state.color;
         const p1Count = getStoneCount(squares, p1);
         const p2 = p1 === 'black' ? 'white' : 'black';
         const p2Count = getStoneCount(squares, p2);
@@ -246,6 +285,14 @@ function Toggle(props) {
     return (
         <button className={`toggle ${props.mode}`} onClick={props.onClick}>
 	    {props.value}
+        </button>
+    );
+}
+
+function Character(props) {
+    return (
+        <button className={`character ${props.spName}`} onClick={props.onClick}>
+	    {props.spName}
         </button>
     );
 }
@@ -330,6 +377,8 @@ function getReversibleSquares(i, stone, squares) {
             if(count !== 0) {
                 if(squares[current] === null) break;
             }
+
+	    if(squares[current] === 'block') break;
 
             if(squares[current] === stone) {
                 result = result.concat(tmp);
