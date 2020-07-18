@@ -51,12 +51,8 @@ class Game extends React.Component {
 	    canUseSp: true,
             xIsNext: true,
             squares: squares,
+	    history: [],
         };
-
-        this.webSocket({
-            squares: squares,
-            xIsNext: true,
-        });
     }
     
     webSocket(data) {
@@ -91,43 +87,46 @@ class Game extends React.Component {
         this.setState({
             squares: data.squares,
             xIsNext: data.xIsNext,
+	    history: data.history,
         });
     }
 
     handleClick(i) {
         const squares = this.state.squares.slice();
-        const turn = getTurn(this.state.xIsNext, squares);
-        let next = turn !== CONFIG.blackStone;
 
+        const turn = getTurn(this.state.xIsNext, squares);
+        const next = turn !== CONFIG.blackStone;
         if(turn !== this.state.color) return;
         if(turn === null) return;
 	
-	if(this.state.isSpMode) {
-	    if(this.state.spName === 'reverse') return this.useSpecial(i);
-	    if(this.state.spName === 'block') return this.useSpecial(i);
-	    if(this.state.spName === 'double') {
-                next = this.state.xIsNext;
-	    	this.useSpecial(i);
-	    }
-	}
+	if(this.state.isSpMode) return this.useSpecial(i);
+	const processed = this.getReversedSquares(i);
 
-        if(squares[i] !== null) return;
-
-        const target = getReversibleSquares(i, turn, squares);
-        if(target.length === 0) return;
-
-        target.forEach(e => squares[e] = turn);
+	const history = this.state.history;
+	history.push(squares);
 
         this.setState({
-            squares: squares,
+            squares: processed,
             xIsNext: next,
         });
 
         this.webSocket({
             id: this.id,
-            squares: squares,
+            squares: processed,
             xIsNext: next,
+	    history: history,
         });
+    }
+
+    getReversedSquares(i) {
+        const squares = this.state.squares.slice();
+        if(squares[i] !== null) return squares;
+
+	const color = this.state.color;
+        const reversibleSquares = getReversibleSquares(i, color, squares);
+        reversibleSquares.forEach(e => squares[e] = color);
+
+	return squares;
     }
 
     toggleMode() {
@@ -144,8 +143,9 @@ class Game extends React.Component {
     }
 
     useSpecial(i) {
+        let squares = this.state.squares.slice();
 	let next = ''; 
-        const squares = this.state.squares.slice();
+
 	if(this.state.spName === 'reverse') {
 	    if(squares[i] === null) return;
 	    if(squares[i] === 'block') return;
@@ -154,7 +154,10 @@ class Game extends React.Component {
 	}
 
 	if(this.state.spName === 'double') {
+	    console.log(this.state.history.length);
+	    if(this.state.history.length < 5) return;
 	    next = this.state.xIsNext; 
+	    squares = this.getReversedSquares(i);
 	}
 	
 	if(this.state.spName === 'block') {
@@ -162,6 +165,9 @@ class Game extends React.Component {
 	    next = !this.state.xIsNext; 
 	    squares[i] = 'block';
 	}
+
+	const history = this.state.history;
+	history.push(squares);
 
 	this.setState({
 	    squares: squares,
@@ -174,22 +180,39 @@ class Game extends React.Component {
             id: this.id,
 	    squares: squares,
             xIsNext: next,
+	    history: history,
         });
     }
 
-    setSpName(spName) {
+    onClickCharacter(spName) {
+        const squares = this.state.squares.slice();
+
 	this.setState({
 	    spName: spName,
 	});
+
+        this.webSocket({
+            squares: squares,
+            xIsNext: true,
+        });
     }
 
     render() {
 	if(!this.state.spName) {
 	    return (
 		<div className="character-set">
-		    <Character spName="reverse" onClick={() => this.setSpName("reverse")} />
-		    <Character spName="double" onClick={() => this.setSpName("double")} />
-		    <Character spName="block" onClick={() => this.setSpName("block")} />
+		    <Character
+		     spName="reverse"
+		     onClick={() => this.onClickCharacter("reverse")}
+		    />
+		    <Character
+		     spName="double"
+		     onClick={() => this.onClickCharacter("double")}
+		    />
+		    <Character 
+		     spName="block" 
+		     onClick={() => this.onClickCharacter("block")}
+		    />
 		</div>
 	    );
 	}
@@ -263,6 +286,9 @@ class Game extends React.Component {
             </div>
         );
     }
+}
+
+function GameInfo(props) {
 }
 
 function Stone(props) {
