@@ -3,9 +3,9 @@ import CONFIG from './config.js';
 import Stone from './stone.js';
 
 export default function Result(props) {
-    const player1 = props.p1;
-    const player2 = props.p2;
-    const squares = props.history.slice(-1);
+    const player1 = props.player;
+    const player2 = props.opponent;
+    const squares = props.history.slice(-1)[0];
     const result = calculateResult(squares, player1);
 
     return (
@@ -40,7 +40,7 @@ function calculateResult(squares, color) {
 
     let winner = (stoneCount.black > stoneCount.white) ? black : white;
 
-    return winner === color ? 'Win' : 'Lose';
+    return winner === color ? 'You Win' : 'You Lose';
 }
 
 function getStoneCount(squares, stone) {

@@ -88,6 +88,10 @@ class Game extends React.Component {
         if(turn === null) return;
         
         if(this.state.isSpMode) return this.useSpecial(i);
+
+        const enableSquares = getEnableSquares(this.state.color, squares);
+        if(!enableSquares.includes(i)) return;
+        
         const processed = this.getReversedSquares(i);
 
         const history = this.state.history;
@@ -214,8 +218,8 @@ class Game extends React.Component {
         if(turn === null) {
             return (
                 <Result
-                 p1={p1}
-                 p2={p2}
+                 player={p1}
+                 opponent={p2}
                  count={count}
                  history={this.state.history}
                 />
