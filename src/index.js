@@ -226,6 +226,7 @@ class Game extends React.Component {
             <div className="game">
 
                 <GameInfo 
+                 side="opponent"
                  color={p2}
                  name="Player2"
                  count={count[p2]}
@@ -242,7 +243,8 @@ class Game extends React.Component {
                     />
                 </div>
 
-                <GameInfo 
+                <GameInfo
+                 side="player"
                  color={p1}
                  name="Player1"
                  count={count[p1]}

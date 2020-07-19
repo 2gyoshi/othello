@@ -4,7 +4,7 @@ import Stone from './stone.js';
 
 export default function GameInfo(props) {
     return (
-        <div className="game-info">
+        <div className={`game-info ${props.side}`}>
             <div className="count">
                 <Stone
                  value={props.color}

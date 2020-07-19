@@ -176,20 +176,14 @@ body {
 .game-info {
   display: flex;
   align-items: center;
-  width: 272px;
+  width: 300px;
   height: 30px;
   margin-top: 12px;
   margin-bottom: 12px;
   font-size: 1.2rem;
 }
 
-.game-info.p2 {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.game-info.p2 {
-  display: flex;
+.game-info.opponent {
   justify-content: flex-end;
 }
 
