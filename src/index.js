@@ -227,6 +227,7 @@ class Game extends React.Component {
 
                 <GameInfo 
                  color={p2}
+                 name="Player2"
                  count={count[p2]}
                  mode={'normal'}
                  value="Skill"
@@ -243,6 +244,7 @@ class Game extends React.Component {
 
                 <GameInfo 
                  color={p1}
+                 name="Player1"
                  count={count[p1]}
                  mode={this.state.isSpMode ? 'special' : 'normal'}
                  value="Skill"

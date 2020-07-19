@@ -4,14 +4,14 @@ import Stone from './stone.js';
 
 export default function GameInfo(props) {
     return (
-        <div className={`game-info ${props.color}`}>
+        <div className="game-info">
             <div className="count">
                 <Stone
                  value={props.color}
                  count={props.count}
                 />
             </div>
-            <div className="name">Player1</div>
+            <div className="name">{props.name}</div>
             <Toggle
              mode={props.mode}
              value={props.value}
