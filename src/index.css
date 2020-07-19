@@ -176,11 +176,16 @@ body {
 .game-info {
   display: flex;
   align-items: center;
-  width: 300px;
+  width: 272px;
   height: 30px;
   margin-top: 12px;
   margin-bottom: 12px;
   font-size: 1.2rem;
+}
+
+.game-info.p2 {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .game-info.p2 {
@@ -330,11 +335,23 @@ body {
   font-size: 24px;
 }
 
-.result__description {
+.result__black {
   display: flex;
   align-items: center;
   margin-top: 12px;
   margin-bottom: 12px;
+}
+
+.result__white {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.result__description {
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 .result__name {

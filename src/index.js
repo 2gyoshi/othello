@@ -1,37 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CONFIG from './config.js';
-import Square from './square.js';
-import SkillCard from './skill-card.js';
+import Dialog from './dialog.js';
+import Board from './board.js';
+import GameInfo from './game-info.js'
+import Entry from './entry.js';
+import Result from './result.js';
 import './index.css';
 
 const MODE = 'develop';
-
-class Board extends React.Component {
-    renderSquare(i) {
-        return (
-            <Square
-             value={this.props.squares[i]}
-             onClick={() => this.props.onClick(i)}
-             enable={this.props.enableSquares.includes(i) ? 'enable' : ''}
-             key={i}
-            />
-        );
-    }
-
-    render() {
-        const list = [];
-        for (let i = 0; i < 64; i++) {
-            list.push(this.renderSquare(i));
-        }
-
-        return (
-            <div className="board">
-                {list}
-            </div>
-        );
-    }
-}
 
 class Game extends React.Component {
     constructor(props) {
@@ -211,25 +188,7 @@ class Game extends React.Component {
     render() {
         if(!this.state.spName) {
             return (
-                <div className="entry">
-                    <header className="entry__header">
-                        <h1 className="entry__title">
-                            スキルを選んでください。
-                        </h1>
-                    </header>
-                    <SkillCard
-                     skill="reverse"
-                     onClick={() => this.onClickCharacter("reverse")}
-                    />
-                    <SkillCard
-                     skill="double"
-                     onClick={() => this.onClickCharacter("double")}
-                    />
-                    <SkillCard 
-                     skill="block" 
-                     onClick={() => this.onClickCharacter("block")}
-                    />
-                </div>
+                <Entry onClick={this.onClickCharacter.bind(this)} />
             );
         }
 
@@ -252,7 +211,7 @@ class Game extends React.Component {
         const p2 = p1 === 'black' ? 'white' : 'black';
         const count = getStoneCount(squares);
 
-        if(MODE === 'develop') {
+        if(turn === null) {
             return (
                 <Result
                  p1={p1}
@@ -266,25 +225,15 @@ class Game extends React.Component {
         return (
             <div className="game">
 
-                <div className="game-info p2">
-                    <div className="name">Player2</div>
-                    <div className="count">
-                        <Stone
-                         value={p2}
-                         count={count[p2]}
-                        />
-                    </div>
-                </div>
+                <GameInfo 
+                 color={p2}
+                 count={count[p2]}
+                 mode={'normal'}
+                 value="Skill"
+                 onClick={() => console.log('none')}
+                />
 
                 <div className="game-board">
-                    <div className="board-mark">
-                        <div className="mark lt"/>
-                        <div className="mark lb"/>
-                        <div className="mark rt"/>
-                        <div className="mark rb"/>
-                        <div/>
-                    </div>
-
                     <Board 
                      squares={squares}
                      enableSquares={enableSquares}
@@ -292,77 +241,16 @@ class Game extends React.Component {
                     />
                 </div>
 
-                <div className="game-info p1">
-                    <div className="count">
-                        <Stone
-                         value={p1}
-                         count={count[p1]}
-                        />
-                    </div>
-                    <div className="name">Player1</div>
-                    <Toggle
-                     mode={this.state.isSpMode ? 'special' : 'normal'}
-                     value="Skill"
-                     onClick={() => this.toggleMode()}
-                    />
-                </div>
+                <GameInfo 
+                 color={p1}
+                 count={count[p1]}
+                 mode={this.state.isSpMode ? 'special' : 'normal'}
+                 value="Skill"
+                 onClick={() => this.toggleMode()}
+                />
             </div>
         );
     }
-}
-
-function Result(props) {
-    const player1 = props.p1;
-    const player2 = props.p2;
-    const squares = props.history.slice(-1);
-    const result = calculateResult(squares, player1);
-
-    return (
-        <div className="result">
-            <div className="result__message">
-                {result}
-            </div>
-            <div className={`result__${player1}`}>
-                <div className="result__description">
-                    <span className="result__name">Player1</span>
-                    <Stone value={player1} />
-                    <span className="result__count">{`x${props.count[player1]}`}</span>
-                </div>
-            </div>
-            <div className={`result__${player2}`}>
-                <div className="result__description">
-                    <span className="result__name">Player2</span>
-                    <Stone value={player2} />
-                    <span className="result__count">{`x${props.count[player2]}`}</span>
-                </div>
-            </div>
-            <button className="result__button" onClick={() => window.location.reload()}>OK</button>
-        </div>
-    );
-}
-
-function Stone(props) {
-    return (
-        <div className={`stone ${props.value}`}>
-            {props.count}
-        </div>
-    );
-}
-
-function Dialog(props) {
-    return (
-        <div className={`dialog ${props.kind} ${props.view}`}>
-            {props.message}
-        </div>
-    );
-}
-
-function Toggle(props) {
-    return (
-        <button className={`toggle ${props.mode}`} onClick={props.onClick}>
-            {props.value}
-        </button>
-    );
 }
 
 function getTurn(isBlackTurn, squares) {
@@ -376,19 +264,6 @@ function getTurn(isBlackTurn, squares) {
     if(enableSquares.length > 0) return second; 
 
     return null;
-}
-
-function calculateResult(squares, color) {
-    const black = CONFIG.blackStone;
-    const white = CONFIG.whiteStone;
-
-    const stoneCount = getStoneCount(squares);
-
-    if(stoneCount.black === stoneCount.white) return 'Draw';
-
-    let winner = (stoneCount.black > stoneCount.white) ? black : white;
-
-    return winner === color ? 'Win' : 'Lose';
 }
 
 function getStoneCount(squares, stone) {
