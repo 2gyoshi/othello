@@ -237,7 +237,7 @@ class Game extends React.Component {
             return (
                 <Dialog
                  message="対戦相手を探しています..."
-                 waiting="waiting"
+                 kind="waiting"
                 />
             );
         }
@@ -245,25 +245,33 @@ class Game extends React.Component {
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
 
-        let result = '';
-        if(turn === null) result = 'Result: ' + calculateWinner(squares);
-
         let enableSquares = getEnableSquares(this.state.color, squares);
         if(this.state.color !== turn) enableSquares = [];
 
         const p1 = this.state.color;
-        const p1Count = getStoneCount(squares, p1);
         const p2 = p1 === 'black' ? 'white' : 'black';
-        const p2Count = getStoneCount(squares, p2);
+        const count = getStoneCount(squares);
+
+        if(MODE === 'develop') {
+            return (
+                <Result
+                 p1={p1}
+                 p2={p2}
+                 count={count}
+                 history={this.state.history}
+                />
+            );
+        }
 
         return (
             <div className="game">
+
                 <div className="game-info p2">
                     <div className="name">Player2</div>
                     <div className="count">
                         <Stone
                          value={p2}
-                         count={p2Count}
+                         count={count[p2]}
                         />
                     </div>
                 </div>
@@ -288,7 +296,7 @@ class Game extends React.Component {
                     <div className="count">
                         <Stone
                          value={p1}
-                         count={p1Count}
+                         count={count[p1]}
                         />
                     </div>
                     <div className="name">Player1</div>
@@ -298,13 +306,39 @@ class Game extends React.Component {
                      onClick={() => this.toggleMode()}
                     />
                 </div>
-                <div className="result">{result}</div>
             </div>
         );
     }
 }
 
-function GameInfo(props) {
+function Result(props) {
+    const player1 = props.p1;
+    const player2 = props.p2;
+    const squares = props.history.slice(-1);
+    const result = calculateResult(squares, player1);
+
+    return (
+        <div className="result">
+            <div className="result__message">
+                {result}
+            </div>
+            <div className={`result__${player1}`}>
+                <div className="result__description">
+                    <span className="result__name">Player1</span>
+                    <Stone value={player1} />
+                    <span className="result__count">{`x${props.count[player1]}`}</span>
+                </div>
+            </div>
+            <div className={`result__${player2}`}>
+                <div className="result__description">
+                    <span className="result__name">Player2</span>
+                    <Stone value={player2} />
+                    <span className="result__count">{`x${props.count[player2]}`}</span>
+                </div>
+            </div>
+            <button className="result__button" onClick={() => window.location.reload()}>OK</button>
+        </div>
+    );
 }
 
 function Stone(props) {
@@ -317,7 +351,7 @@ function Stone(props) {
 
 function Dialog(props) {
     return (
-        <div className={`dialog ${props.waiting}`}>
+        <div className={`dialog ${props.kind} ${props.view}`}>
             {props.message}
         </div>
     );
@@ -344,13 +378,17 @@ function getTurn(isBlackTurn, squares) {
     return null;
 }
 
-function calculateWinner(squares) {
+function calculateResult(squares, color) {
     const black = CONFIG.blackStone;
     const white = CONFIG.whiteStone;
+
     const stoneCount = getStoneCount(squares);
+
     if(stoneCount.black === stoneCount.white) return 'Draw';
-    if(stoneCount.black > stoneCount.white) return black;
-    if(stoneCount.black < stoneCount.white) return white;
+
+    let winner = (stoneCount.black > stoneCount.white) ? black : white;
+
+    return winner === color ? 'Win' : 'Lose';
 }
 
 function getStoneCount(squares, stone) {
