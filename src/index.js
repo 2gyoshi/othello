@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import CONFIG from './config.js';
+import Square from './square.js';
+import SkillCard from './skill-card.js';
 import './index.css';
 
-function Square(props) {
-    return (
-        <button className={`square ${props.value} ${props.enable}`} onClick={props.onClick} />
-    );
-}
+const MODE = 'develop';
 
 class Board extends React.Component {
     renderSquare(i) {
@@ -45,28 +44,33 @@ class Game extends React.Component {
         squares[36] = CONFIG.whiteStone;
 
         this.state = {
-	    color: '',
-	    spName: '',
-	    isSpMode: false,
-	    canUseSp: true,
+            color: '',
+            spName: '',
+            isSpMode: false,
+            canUseSp: true,
             xIsNext: true,
             squares: squares,
-	    history: [],
+            history: [],
         };
     }
     
     webSocket(data) {
+        if(MODE === 'develop') {
+            this.setTurn();
+            return;
+        }
+
         const io = window.io;
         const socket = io.connect(window.location.host);
 
-	if(!this.id) {
+        if(!this.id) {
             const max = 99999;
             const min = 10000;
             this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
             socket.emit('login', this.id);
-	}
+        }
 
-	// サーバーに振り分けられた順番を設定する
+        // サーバーに振り分けられた順番を設定する
         socket.on('setTurn', msg => this.setTurn(msg));
 
         // サーバーにデータ送信する
@@ -77,6 +81,13 @@ class Game extends React.Component {
     }
 
     setTurn(msg) {
+        if(MODE === 'develop') {
+            this.setState({
+                color: 'black',
+            });
+            return
+        }
+
         this.setState({
             color: msg[this.id],
         });
@@ -87,7 +98,7 @@ class Game extends React.Component {
         this.setState({
             squares: data.squares,
             xIsNext: data.xIsNext,
-	    history: data.history,
+            history: data.history,
         });
     }
 
@@ -98,12 +109,12 @@ class Game extends React.Component {
         const next = turn !== CONFIG.blackStone;
         if(turn !== this.state.color) return;
         if(turn === null) return;
-	
-	if(this.state.isSpMode) return this.useSpecial(i);
-	const processed = this.getReversedSquares(i);
+        
+        if(this.state.isSpMode) return this.useSpecial(i);
+        const processed = this.getReversedSquares(i);
 
-	const history = this.state.history;
-	history.push(squares);
+        const history = this.state.history;
+        history.push(squares);
 
         this.setState({
             squares: processed,
@@ -114,7 +125,7 @@ class Game extends React.Component {
             id: this.id,
             squares: processed,
             xIsNext: next,
-	    history: history,
+            history: history,
         });
     }
 
@@ -122,15 +133,15 @@ class Game extends React.Component {
         const squares = this.state.squares.slice();
         if(squares[i] !== null) return squares;
 
-	const color = this.state.color;
+        const color = this.state.color;
         const reversibleSquares = getReversibleSquares(i, color, squares);
         reversibleSquares.forEach(e => squares[e] = color);
 
-	return squares;
+        return squares;
     }
 
     toggleMode() {
-	if(this.state.canUseSp === false) return;
+        if(this.state.canUseSp === false) return;
 
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
@@ -138,58 +149,58 @@ class Game extends React.Component {
         if(turn === null) return;
 
         this.setState({
-	    isSpMode: !this.state.isSpMode,
-	});
+            isSpMode: !this.state.isSpMode,
+        });
     }
 
     useSpecial(i) {
         let squares = this.state.squares.slice();
-	let next = ''; 
+        let next = ''; 
 
-	if(this.state.spName === 'reverse') {
-	    if(squares[i] === null) return;
-	    if(squares[i] === 'block') return;
-	    next = !this.state.xIsNext; 
-	    squares[i] = squares[i] === 'black' ? 'white' : 'black';
-	}
+        if(this.state.spName === 'reverse') {
+            if(squares[i] === null) return;
+            if(squares[i] === 'block') return;
+            next = !this.state.xIsNext; 
+            squares[i] = squares[i] === 'black' ? 'white' : 'black';
+        }
 
-	if(this.state.spName === 'double') {
-	    console.log(this.state.history.length);
-	    if(this.state.history.length < 5) return;
-	    next = this.state.xIsNext; 
-	    squares = this.getReversedSquares(i);
-	}
-	
-	if(this.state.spName === 'block') {
-	    if(squares[i] !== null) return;
-	    next = !this.state.xIsNext; 
-	    squares[i] = 'block';
-	}
+        if(this.state.spName === 'double') {
+            console.log(this.state.history.length);
+            if(this.state.history.length < 5) return;
+            next = this.state.xIsNext; 
+            squares = this.getReversedSquares(i);
+        }
+        
+        if(this.state.spName === 'block') {
+            if(squares[i] !== null) return;
+            next = !this.state.xIsNext; 
+            squares[i] = 'block';
+        }
 
-	const history = this.state.history;
-	history.push(squares);
+        const history = this.state.history;
+        history.push(squares);
 
-	this.setState({
-	    squares: squares,
+        this.setState({
+            squares: squares,
             xIsNext: next,
             isSpMode: false,
-	    canUseSp: false,
-	});
+            canUseSp: false,
+        });
 
         this.webSocket({
             id: this.id,
-	    squares: squares,
+            squares: squares,
             xIsNext: next,
-	    history: history,
+            history: history,
         });
     }
 
     onClickCharacter(spName) {
         const squares = this.state.squares.slice();
 
-	this.setState({
-	    spName: spName,
-	});
+        this.setState({
+            spName: spName,
+        });
 
         this.webSocket({
             squares: squares,
@@ -198,30 +209,35 @@ class Game extends React.Component {
     }
 
     render() {
-	if(!this.state.spName) {
-	    return (
-		<div className="character-set">
-		    <Character
-		     spName="reverse"
-		     onClick={() => this.onClickCharacter("reverse")}
-		    />
-		    <Character
-		     spName="double"
-		     onClick={() => this.onClickCharacter("double")}
-		    />
-		    <Character 
-		     spName="block" 
-		     onClick={() => this.onClickCharacter("block")}
-		    />
-		</div>
-	    );
-	}
+        if(!this.state.spName) {
+            return (
+                <div className="entry">
+                    <header className="entry__header">
+                        <h1 className="entry__title">
+                            スキルを選んでください。
+                        </h1>
+                    </header>
+                    <SkillCard
+                     skill="reverse"
+                     onClick={() => this.onClickCharacter("reverse")}
+                    />
+                    <SkillCard
+                     skill="double"
+                     onClick={() => this.onClickCharacter("double")}
+                    />
+                    <SkillCard 
+                     skill="block" 
+                     onClick={() => this.onClickCharacter("block")}
+                    />
+                </div>
+            );
+        }
 
         if(!this.state.color) {
             return (
                 <Dialog
-                 message="Waiting for opponent..."
-		 waiting="waiting"
+                 message="対戦相手を探しています..."
+                 waiting="waiting"
                 />
             );
         }
@@ -229,11 +245,11 @@ class Game extends React.Component {
         const squares = this.state.squares.slice();
         const turn = getTurn(this.state.xIsNext, squares);
 
-	let result = '';
-	if(turn === null) result = 'Result: ' + calculateWinner(squares);
+        let result = '';
+        if(turn === null) result = 'Result: ' + calculateWinner(squares);
 
         let enableSquares = getEnableSquares(this.state.color, squares);
-	if(this.state.color !== turn) enableSquares = [];
+        if(this.state.color !== turn) enableSquares = [];
 
         const p1 = this.state.color;
         const p1Count = getStoneCount(squares, p1);
@@ -276,13 +292,13 @@ class Game extends React.Component {
                         />
                     </div>
                     <div className="name">Player1</div>
-		    <Toggle
-		     mode={this.state.isSpMode ? 'special' : 'normal'}
-		     value="SP"
-		     onClick={() => this.toggleMode()}
-		    />
+                    <Toggle
+                     mode={this.state.isSpMode ? 'special' : 'normal'}
+                     value="Skill"
+                     onClick={() => this.toggleMode()}
+                    />
                 </div>
-		<div className="result">{result}</div>
+                <div className="result">{result}</div>
             </div>
         );
     }
@@ -310,15 +326,7 @@ function Dialog(props) {
 function Toggle(props) {
     return (
         <button className={`toggle ${props.mode}`} onClick={props.onClick}>
-	    {props.value}
-        </button>
-    );
-}
-
-function Character(props) {
-    return (
-        <button className={`character ${props.spName}`} onClick={props.onClick}>
-	    {props.spName}
+            {props.value}
         </button>
     );
 }
@@ -404,7 +412,7 @@ function getReversibleSquares(i, stone, squares) {
                 if(squares[current] === null) break;
             }
 
-	    if(squares[current] === 'block') break;
+            if(squares[current] === 'block') break;
 
             if(squares[current] === stone) {
                 result = result.concat(tmp);
@@ -461,11 +469,6 @@ function getLimit() {
         b:  b,
         br: br
     };
-}
-
-const CONFIG = {
-    whiteStone: 'white',
-    blackStone: 'black'
 }
 
 // ========================================

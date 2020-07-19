@@ -4,7 +4,7 @@
   padding: 0;
 }
 
-.button {
+button {
   appearance: none;
   border: none;
   cursor: pointer;
@@ -14,6 +14,9 @@ button:focus {
   outline: none;
 }
 
+a {
+  cursor: pointer;
+}
 
 html, body {
   width: 100%;
@@ -21,13 +24,13 @@ html, body {
 }
 
 body {
-  font-family: "Century Gothic", Futura, sans-serif;
   font-size: 62.5%;
 }
 
 #root {
   width: 100%;
   height: 100%;
+  font-size: 62.5%;
 }
 
 .game {
@@ -205,7 +208,7 @@ body {
   background: #fff;
 }
 
-.name {
+.game-info .name {
   margin-left: .5em;
   margin-right: .5em;
 }
@@ -252,8 +255,7 @@ body {
   animation: waiting .3s ease-in-out 0s infinite alternate;
 }
 
-.character-set {
-  display: flex;
+.entry {
   width: 300px;
   position: absolute;
   left: 50%;
@@ -261,8 +263,56 @@ body {
   transform: translate(-50%, -50%);
 }
 
-.character {
-    width: 76px;
-    height: 76px;
-    margin: 12px;
+.entry__header {
+  height: 30px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.entry__header::before {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 30px;
+  background: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.entry__title {
+  font-size: 18px;
+  line-height: 30px;
+  position: absolute;
+  left: 18px;
+  top: 0;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  border: 1px solid #000;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.card .name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid #000;
+  margin: 12px;
+}
+
+.card .description {
+  width: calc(100% - 108px);
+  height: 72px;
+  margin: 12px;
+  margin-left: 0;
+  font-size: 12px;
 }
