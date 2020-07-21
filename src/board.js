@@ -20,14 +20,12 @@ export default class Board extends React.Component {
         }
 
         return (
-
             <div className="board">
                 <div className="board-mark">
                     <div className="mark lt"/>
                     <div className="mark lb"/>
                     <div className="mark rt"/>
                     <div className="mark rb"/>
-                    <div/>
                 </div>
 
                 {list}

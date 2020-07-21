@@ -14,10 +14,11 @@ io.sockets.on('connection', function(socket) {
       socket.join(roomId);
 
       players.push(id);
-      roomIdHolder[id] = roomId
-      const data = divideTurn(players);
+      roomIdHolder[id] = roomId;
 
-      io.to(roomId).emit('setTurn', data);
+      const color = divideTurn(players);
+      const data = { color: color, roomId: roomId };
+      io.to(roomId).emit('test', data);
 
       players = [];
       isExistWaitingPlayer = false;
@@ -26,14 +27,19 @@ io.sockets.on('connection', function(socket) {
       socket.join(roomId);
 
       players.push(id);
-      roomIdHolder[id] = roomId
+      roomIdHolder[id] = roomId;
       isExistWaitingPlayer = true;
     }
+  });
+
+  socket.on('enter', function(roomId) {
+    socket.join(roomId);
   });
 
   // event when recieving messages
   socket.on('message', function(msg) {
     console.log('message');
+
     const data = JSON.parse(msg);
     io.to(roomIdHolder[data.id]).emit('message', msg);
   });
@@ -53,8 +59,8 @@ function divideTurn(players) {
     result[player1] = 'black';
     result[player2] = 'white';
   } else {
-    result[player1] = 'black';
-    result[player2] = 'white';
+    result[player1] = 'white';
+    result[player2] = 'black';
   }
 
   return result;
@@ -65,6 +71,6 @@ function getRoomId(){
 }
 
 function getRandom(min, max) {
-  return Math.floor( Math.random() * (max + 1 - min) ) + min
+  return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
 
