@@ -5,6 +5,7 @@
 }
 
 button {
+  font-size: 100%;
   background: #fff;
   appearance: none;
   border: none;
@@ -36,16 +37,15 @@ body {
 }
 
 .game {
+  width: 100%;
+  height: 100%;
+}
+
+.game-board {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-}
-
-.game-board {
-  width: 300px;
-  height: 300px;
-  position: relative;
 }
 
 .board {
@@ -57,10 +57,9 @@ body {
   border: 1px solid #000;
   border-right-color: transparent;
   border-bottom-color: transparent;
-  position: absolute;
+  position: relative;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .board-mark {
@@ -242,18 +241,6 @@ body {
   animation: waiting 1s ease-in-out 0s infinite alternate;
 }
 
-.toggle {
-  width: 45px;
-  height: 30px;
-  border-radius: 5px;
-  border: 1px solid #000;
-  position: relative;
-}
-
-.toggle.special {
-  animation: waiting .3s ease-in-out 0s infinite alternate;
-}
-
 .entry {
   width: 300px;
   position: absolute;
@@ -411,3 +398,71 @@ body {
   transform: translateX(-50%);
   font-size: 14px;
 }
+
+.game__button {
+  display: inline-block;
+  font-size: 16px;
+  border: 1px solid #000;
+}
+
+.-ok, .-cancel {
+  width: 80px;
+  height: 30px;
+}
+
+.-ok {
+  background: #E0E0E0;
+  position: absolute;
+  left: 58px;
+  bottom: 24px;
+}
+
+.-cancel {
+  position: absolute;
+  right: 58px;
+  bottom: 24px;
+}
+
+.-skill,
+.-surrender
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 5px;
+}
+
+.game__confirm {
+  width: 300px;
+  height: 150px;
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #000;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.-hidden {
+  display: none;
+}
+
+.game__message {
+  font-size: 20px;
+  text-align: center;
+}
+
+.game__layer {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  left: 0;
+  top:0;
+  opacity: .3;
+}
+

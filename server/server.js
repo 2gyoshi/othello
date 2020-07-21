@@ -18,7 +18,7 @@ io.sockets.on('connection', function(socket) {
 
       const color = divideTurn(players);
       const data = { color: color, roomId: roomId };
-      io.to(roomId).emit('test', data);
+      io.to(roomId).emit('message', data);
 
       players = [];
       isExistWaitingPlayer = false;

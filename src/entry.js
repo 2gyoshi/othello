@@ -1,45 +1,86 @@
 import React from 'react';
-import Card from './card';
-import CONFIG from './config.js';
+import Dialog from './dialog.js';
+
+const MODE = 'develop';
 
 class Entry extends React.Component {
     constructor(props) {
         super(props);
-
-        this.reverse = CONFIG.skill.reverse;
-        this.double  = CONFIG.skill.double;
-        this.block   = CONFIG.skill.block;
+        this.state = { color: '', roomId: '' };
+        this.init();
     }
 
-    onClickCard(skill) {
-        const data = {skill: skill.name};
+    init() {
+        const max = 99999;
+        const min = 10000;
+        this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
+
+        // socket.io に接続する
+        const socket = window.io.connect(window.location.host);
+
+        // サーバーにデータを送信する
+        socket.emit('login', this.id);
+        
+        if(MODE === 'develop') {
+            return setTimeout(() => {
+                this.setState({
+                    color: 'black',
+	            roomId: 'test',
+                });
+            }, 1000);
+        }
+
+        // サーバーからデータを受信する
+        socket.on('message', msg => this.recieve(msg));
+    }
+
+    recieve(data) {
+        this.setState({
+            color: data.color[this.id],
+	    roomId: data.roomId,
+        });
+    }
+
+    ready() {
+        return setTimeout(() => {
+            this.start();
+        }, 1000)
+    }
+
+
+    start() {
+        const skill = this.props.location.state.skill;
+
+        const data = {
+            id: this.id,
+            roomId: this.state.roomId,
+            color: this.state.color,
+            skill: skill,
+        }
+
         this.props.history.push({
-            pathname: '/work/othello/match',
             state: data,
+            pathname: '/work/othello/game',
         });
     }
 
     render() {
+        if(!this.state.color) {
+            return (
+                <Dialog
+                 message="対戦相手を探しています..."
+                 kind="waiting"
+                />
+            );
+        }
+
+        this.ready();
+
         return (
-            <div className="entry">
-                <header className="entry__header">
-                    <h1 className="entry__title">
-                        スキルを選んでください。
-                    </h1>
-                </header>
-                <Card
-                 data={this.reverse}
-                 onClick={this.onClickCard.bind(this, this.reverse)}
-                />
-                <Card
-                 data={this.double}
-                 onClick={this.onClickCard.bind(this, this.double)}
-                />
-                <Card
-                 data={this.block}
-                 onClick={this.onClickCard.bind(this, this.block)}
-                />
-            </div>
+            <Dialog
+                message="対戦相手が見つかりました"
+                kind="normal"
+            />
         );
     }
 }

@@ -1,11 +1,11 @@
 import React from 'react';
 
-export default function Stone(props) {
+function Stone(props) {
     return (
-        <div className={`stone ${props.value}`}>
+        <div className={`stone ${props.color}`}>
             {props.count}
         </div>
     );
 }
 
-
+export default Stone;

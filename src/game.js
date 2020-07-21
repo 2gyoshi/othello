@@ -1,8 +1,14 @@
 import React from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFlag } from "@fortawesome/free-regular-svg-icons";
+
 import CONFIG from './config.js';
 import Board from './board.js';
 import GameInfo from './game-info.js'
+import SkillButton from './toggle.js';
+import Stone from './stone.js';
 import Result from './result.js';
+
 import './index.css';
 
 class Game extends React.Component {
@@ -11,7 +17,7 @@ class Game extends React.Component {
 
         this.id = this.props.location.state.id;
         this.roomId = this.props.location.state.roomId;
-	this.initSocket();
+        this.initSocket();
 
         const squares = Array(64).fill(null);
         squares[27] = CONFIG.whiteStone;
@@ -24,32 +30,32 @@ class Game extends React.Component {
 
         this.state = {
             color: color,
-            spName: skill,
-            isSpMode: false,
-            canUseSp: true,
+            skill: skill,
             xIsNext: true,
             squares: squares,
             history: [squares],
+            isSpMode: false,
+            canUseSp: true,
+            gameState: 'playing',
         };
     }
     
     initSocket() {
-	const socket = window.io.connect(window.location.host);
+        const socket = window.io.connect(window.location.host);
 
-	// サーバールームに入る
-	socket.emit('enter', this.roomId);
+        // サーバールームに入る
+        socket.emit('enter', this.roomId);
 
         // サーバーからデータを受信する
         socket.on('message', msg => this.recieve(msg));
     }
 
     send(data) {
-	const socket = window.io.connect(window.location.host);
+        const socket = window.io.connect(window.location.host);
         socket.emit('message', JSON.stringify(data));
     }
 
     recieve(msg) {
-	console.log(msg);
         const data = JSON.parse(msg);
         this.setState({
             squares: data.squares,
@@ -117,21 +123,21 @@ class Game extends React.Component {
         let squares = this.state.squares.slice();
         let next = ''; 
 
-        if(this.state.spName === 'reverse') {
+        if(this.state.skill === 'reverse') {
             if(squares[i] === null) return;
             if(squares[i] === 'block') return;
             next = !this.state.xIsNext; 
             squares[i] = squares[i] === 'black' ? 'white' : 'black';
         }
 
-        if(this.state.spName === 'double') {
+        if(this.state.skill === 'double') {
             console.log(this.state.history.length);
             if(this.state.history.length < 5) return;
             next = this.state.xIsNext; 
             squares = this.getReversedSquares(i);
         }
         
-        if(this.state.spName === 'block') {
+        if(this.state.skill === 'block') {
             if(squares[i] !== null) return;
             next = !this.state.xIsNext; 
             squares[i] = 'block';
@@ -152,6 +158,27 @@ class Game extends React.Component {
             squares: squares,
             xIsNext: next,
             history: history,
+        });
+    }
+
+    confirm() {
+        console.log('confirm')
+        this.setState({
+            gameState: 'confirm',
+        })
+    }
+
+    surrender() {
+        console.log('surrender')
+        this.setState({
+            gameState: 'surrender',
+        })
+    }
+
+    continue() {
+        console.log('continue')
+        this.setState({
+            gameState: 'playing',
         });
     }
 
@@ -180,32 +207,41 @@ class Game extends React.Component {
         return (
             <div className="game">
 
-                <GameInfo 
-                 side="opponent"
-                 color={p2}
-                 name="Player2"
-                 count={count[p2]}
-                 mode={'normal'}
-                 value="Skill"
-                 onClick={() => console.log('none')}
-                />
-
                 <div className="game-board">
+
+                    <GameInfo side="opponent">
+                        <div className="name">Player2</div>
+                        <Stone color={p2} count={count[p2]} />
+                    </GameInfo>
+
                     <Board 
                      squares={squares}
                      enableSquares={enableSquares}
                      onClick={i => this.handleClick(i)}
                     />
-                </div>
 
-                <GameInfo
-                 side="player"
-                 color={p1}
-                 name="Player1"
-                 count={count[p1]}
-                 mode={this.state.isSpMode ? 'special' : 'normal'}
-                 value="Skill"
-                 onClick={() => this.toggleMode()}
+                    <GameInfo side="player">
+                        <Stone color={p1} count={count[p1]} />
+                        <div className="name">Player1</div>
+                        <SkillButton
+                         mode={this.state.isSpMode ? 'special' : 'normal'}
+                         value={this.state.skill}
+                         onClick={() => this.toggleMode()}
+                        />
+                        <Surrender onClick={() => this.confirm()} />
+                    </GameInfo>
+
+                </div>
+                
+                <Layer
+                 className="game__layer"
+                 viewState={this.state.gameState === 'confirm' ? 'show' : 'hidden'}
+                />
+
+                <Confirm
+                 viewState={this.state.gameState === 'confirm' ? 'show' : 'hidden'}
+                 onClickOK={this.surrender.bind(this)}
+                 onClickCancel={this.continue.bind(this)}
                 />
             </div>
         );
@@ -213,6 +249,51 @@ class Game extends React.Component {
 }
 
 export default Game;
+
+function Confirm(props) {
+    return(
+        <div className={`game__confirm ${'-' + props.viewState}`}>
+            <p class="game__message">
+                降参しますか？
+            </p>
+            <Button 
+             value="OK"
+             className="game__button -ok"
+             onClick={props.onClickOK}
+            />
+            <Button 
+             value="Cancel"
+             className="game__button -cancel"
+             onClick={props.onClickCancel}
+            />
+        </div>
+    );
+}
+
+
+function Layer(props) {
+    return (
+        <div className={`${props.className} ${'-' + props.viewState}`} />
+    )
+}
+
+function Button(props) {
+    return(
+        <button className={props.className} onClick={props.onClick}>
+            {props.value}
+        </button>
+    );
+}
+
+function Surrender(props) {
+    return (
+        <Button
+         value={<FontAwesomeIcon icon={faFlag}/>}
+         className="game__button -surrender"
+         onClick={() => props.onClick()}
+        />
+    );
+}
 
 
 function getTurn(isBlackTurn, squares) {
