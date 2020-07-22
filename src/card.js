@@ -3,7 +3,8 @@ import React from 'react';
 class Card extends React.Component {
     render() {
         return (
-            <button className="card" onClick={this.props.onClick}>
+            <button className={this.props.className}
+             onClick={this.props.onClick}>
                 <span className="name">
                     {this.props.data.name}
                 </span>

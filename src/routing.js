@@ -5,6 +5,7 @@ import Index from './index.js'
 import Skill from './skill.js';
 import Entry from'./entry.js';
 import Game from'./game.js';
+import Result from'./result.js';
 
 export default class Routing extends React.Component {
     render() {
@@ -16,6 +17,7 @@ export default class Routing extends React.Component {
                     <Route exact path="/work/othello/friend" component={Skill} />
                     <Route exact path="/work/othello/match" component={Entry} />
                     <Route exact path="/work/othello/game" component={Game} />
+                    <Route exact path="/work/othello/result" component={Result} />
                 </Switch>
             </Router>
         );

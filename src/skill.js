@@ -1,6 +1,7 @@
 import React from 'react';
 import Card from './card';
 import CONFIG from './config.js';
+import './skill.css'
 
 class Skill extends React.Component {
     constructor(props) {
@@ -21,21 +22,24 @@ class Skill extends React.Component {
 
     render() {
         return (
-            <div className="entry">
-                <header className="entry__header">
-                    <h1 className="entry__title">
+            <div className="skill">
+                <header className="skill__header">
+                    <h1 className="skill__title">
                         スキルを選んでください。
                     </h1>
                 </header>
                 <Card
+                 className="skill__card"
                  data={this.reverse}
                  onClick={this.onClickCard.bind(this, this.reverse)}
                 />
                 <Card
+                 className="skill__card"
                  data={this.double}
                  onClick={this.onClickCard.bind(this, this.double)}
                 />
                 <Card
+                 className="skill__card"
                  data={this.block}
                  onClick={this.onClickCard.bind(this, this.block)}
                 />

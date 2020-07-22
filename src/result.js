@@ -1,67 +1,68 @@
 import React from 'react';
 import CONFIG from './config.js';
 import Stone from './stone.js';
+import Button from './button.js';
+import './result.css'
 
-export default function Result(props) {
-    const player1 = props.player;
-    const player2 = props.opponent;
-    const squares = props.history.slice(-1)[0];
-    const result = calculateResult(squares, player1);
+class Result extends React.Component {
+    onClick() {
+        this.props.history.push('/work/othello')
+    }
 
-    return (
-        <div className="result">
-            <div className="result__message">
-                {result}
-            </div>
-            <div className="result__description">
-                <div className={`result__${player1}`}>
-                        <span className="result__name">Player1</span>
-                        <Stone value={player1} />
-                        <span className="result__count">{`x${props.count[player1]}`}</span>
+    render() {
+        console.log(this.props.location)
+        const playerId = this.props.location.state.playerId;
+        const surrenderId = this.props.location.state.surrenderId;
+        const squares = this.props.location.state.history.slice(-1)[0];
+        const myColor = this.props.location.state.myColor;
+        const result = calculateResult(playerId, surrenderId, squares, myColor);
+    
+        return (
+            <div className="result">
+                <div className="result__message">
+                    <h1>{result}</h1>
                 </div>
-                <div className={`result__${player2}`}>
-                        <span className="result__name">Player2</span>
-                        <Stone value={player2} />
-                        <span className="result__count">{`x${props.count[player2]}`}</span>
-                </div>
+                <Button
+                 className="result__button"
+                 value="OK"
+                 onClick={() => this.onClick()}
+                />
             </div>
-            <button className="result__button" onClick={() => window.location.reload()}>OK</button>
-        </div>
-    );
+        );
+    }
 }
 
-function calculateResult(squares, color) {
+export default Result;
+
+function calculateResult(playerId, surrenderId, squares, color) {
+    const win  = 'You Win';
+    const draw = 'Draw';
+    const lose = 'You Lose';
+
+    if(surrenderId) return playerId === surrenderId ? lose : win;
+
     const black = CONFIG.blackStone;
     const white = CONFIG.whiteStone;
 
-    const stoneCount = getStoneCount(squares);
+    const count = getStoneCount(squares);
 
-    if(stoneCount.black === stoneCount.white) return 'Draw';
+    if(count.black === count.white) return draw;
 
-    let winner = (stoneCount.black > stoneCount.white) ? black : white;
+    let winner = (count.black > count.white) ? black : white;
 
-    return winner === color ? 'You Win' : 'You Lose';
+    return winner === color ? win : lose;
 }
 
-function getStoneCount(squares, stone) {
-    const blackStone = CONFIG.blackStone;
-    const whiteStone = CONFIG.whiteStone;
-    let blackStoneCount = 0;
-    let whiteStoneCount = 0;
+function getStoneCount(squares) {
+    const black = CONFIG.blackStone;
+    const white = CONFIG.whiteStone;
+    const count = { black: 0, white: 0 };
+
     for (let i = 0; i < squares.length; i++) {
         if(squares[i] === null) continue;
-        if(squares[i] === blackStone) blackStoneCount++;
-        if(squares[i] === whiteStone) whiteStoneCount++;
+        if(squares[i] === black) count.black++;
+        if(squares[i] === white) count.white++;
     }
 
-    const count = {
-        black: blackStoneCount,
-        white: whiteStoneCount
-    };
-
-    if(!stone) {
-        return count;
-    }
-
-    return count[stone];
+    return count;
 } 

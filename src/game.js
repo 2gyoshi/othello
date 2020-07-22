@@ -7,9 +7,7 @@ import Board from './board.js';
 import GameInfo from './game-info.js'
 import SkillButton from './toggle.js';
 import Stone from './stone.js';
-import Result from './result.js';
-
-import './index.css';
+import './game.css'
 
 class Game extends React.Component {
     constructor(props) {
@@ -48,6 +46,9 @@ class Game extends React.Component {
 
         // サーバーからデータを受信する
         socket.on('message', msg => this.recieve(msg));
+
+        // サレンダーの発生を検知する
+        socket.on('surrender', id => this.end(id))
     }
 
     send(data) {
@@ -169,16 +170,28 @@ class Game extends React.Component {
     }
 
     surrender() {
-        console.log('surrender')
-        this.setState({
-            gameState: 'surrender',
-        })
+        const socket = window.io.connect(window.location.host);
+        socket.emit('surrender', this.id);
     }
 
     continue() {
         console.log('continue')
         this.setState({
             gameState: 'playing',
+        });
+    }
+
+    end(surrenderId) {
+        const data = {
+            playerId: this.id, 
+            surrenderId: surrenderId,
+            myColor: this.color,
+            history: this.state.history,
+        };
+
+        this.props.history.push({
+            state: data,
+            pathname: '/work/othello/result',
         });
     }
 
@@ -190,25 +203,14 @@ class Game extends React.Component {
         if(this.state.color !== turn) enableSquares = [];
 
         const p1 = this.state.color;
-        const p2 = p1 === 'black' ? 'white' : 'black';
+        const p2 = this.state.color === 'black' ? 'white' : 'black';
         const count = getStoneCount(squares);
 
-        if(turn === null) {
-            return (
-                <Result
-                 player={p1}
-                 opponent={p2}
-                 count={count}
-                 history={this.state.history}
-                />
-            );
-        }
+        if(turn === null) return this.end();
 
         return (
             <div className="game">
-
                 <div className="game-board">
-
                     <GameInfo side="opponent">
                         <div className="name">Player2</div>
                         <Stone color={p2} count={count[p2]} />
@@ -243,6 +245,7 @@ class Game extends React.Component {
                  onClickOK={this.surrender.bind(this)}
                  onClickCancel={this.continue.bind(this)}
                 />
+
             </div>
         );
     }
@@ -270,7 +273,6 @@ function Confirm(props) {
     );
 }
 
-
 function Layer(props) {
     return (
         <div className={`${props.className} ${'-' + props.viewState}`} />
@@ -294,7 +296,6 @@ function Surrender(props) {
         />
     );
 }
-
 
 function getTurn(isBlackTurn, squares) {
     let enableSquares = [];

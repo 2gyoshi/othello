@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Dialog(props) {
     return (
-        <div className={`dialog ${props.kind} ${props.view}`}>
+        <div className={`${props.className} ${props.kind}`}>
             {props.message}
         </div>
     );

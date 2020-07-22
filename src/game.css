@@ -1,0 +1,243 @@
+.game {
+  width: 100%;
+  height: 100%;
+}
+
+.game-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.board {
+  display: flex;
+  flex-wrap: wrap;
+  width: 272px;
+  height: 272px;
+  box-sizing: content-box;
+  border: 1px solid #000;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.board-mark {
+  width: 136px;
+  height: 136px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mark {
+  width: 5px;
+  height: 5px;
+  background: #000;
+  border-radius: 50%;
+}
+
+.mark.lt {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.mark.rt {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.mark.lb {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: translate(-50%, -50%);
+}
+
+.mark.rb {
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+}
+
+.square {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #000;
+  border-left: none;
+  border-top: none;
+  position: relative;
+  background: transparent;
+}
+
+.square.white::before {
+  width: 25px;
+  height: 25px;
+  content: "";
+  display: block;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.square.black::before {
+  content: "";
+  display: block;
+  background: #000;
+  border: 1px solid #000;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.square.enable::before {
+  content: "";
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: #ccc;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.square.block::before,
+.square.block::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: #000;
+  position: absolute;
+}
+
+.square.block::before {
+  transform: rotate(-45deg);
+}
+
+.square.block::after {
+  transform: rotate(45deg);
+}
+
+.game-info {
+  display: flex;
+  align-items: center;
+  width: 300px;
+  height: 30px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+.game-info.opponent {
+  justify-content: flex-end;
+}
+
+.stone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
+  border-radius: 50%;
+}
+
+.stone.black {
+  color: #fff;
+  background: #000;
+}
+
+.stone.white {
+  color: #000;
+  background: #fff;
+}
+
+.game-info .name {
+  margin-left: .5em;
+  margin-right: .5em;
+}
+
+.game__button {
+  display: inline-block;
+  font-size: 16px;
+  border: 1px solid #000;
+}
+
+.-ok, .-cancel {
+  width: 80px;
+  height: 30px;
+}
+
+.-ok {
+  background: #E0E0E0;
+  position: absolute;
+  left: 58px;
+  bottom: 24px;
+}
+
+.-cancel {
+  position: absolute;
+  right: 58px;
+  bottom: 24px;
+}
+
+.-skill,
+.-surrender
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 5px;
+}
+
+.game__confirm {
+  width: 300px;
+  height: 150px;
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #000;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.-hidden {
+  display: none;
+}
+
+.game__message {
+  font-size: 20px;
+  text-align: center;
+}
+
+.game__layer {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: .3;
+}

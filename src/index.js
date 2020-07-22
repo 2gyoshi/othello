@@ -24,7 +24,7 @@ import './index.css';
                     <button
                      className="index__button"
                      onClick={this.onClickEntryBtn.bind(this)}>
-                        対戦開始
+                        対戦
                     </button>
                     <button
                      className="index__button"

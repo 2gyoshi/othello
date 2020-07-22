@@ -1,5 +1,7 @@
 import React from 'react';
 import Dialog from './dialog.js';
+import Button from './button.js';
+import './entry.css';
 
 const MODE = 'develop';
 
@@ -25,7 +27,7 @@ class Entry extends React.Component {
             return setTimeout(() => {
                 this.setState({
                     color: 'black',
-	            roomId: 'test',
+                    roomId: 'test',
                 });
             }, 1000);
         }
@@ -37,16 +39,21 @@ class Entry extends React.Component {
     recieve(data) {
         this.setState({
             color: data.color[this.id],
-	    roomId: data.roomId,
+            roomId: data.roomId,
         });
+    }
+
+    cancel() {
+        const socket = window.io.connect(window.location.host);
+        socket.emit('disconnect', this.id);
+        this.props.history.push('/work/othello');
     }
 
     ready() {
         return setTimeout(() => {
             this.start();
-        }, 1000)
+        }, 1000);
     }
-
 
     start() {
         const skill = this.props.location.state.skill;
@@ -65,22 +72,35 @@ class Entry extends React.Component {
     }
 
     render() {
+        let message, kind;
+
         if(!this.state.color) {
-            return (
-                <Dialog
-                 message="対戦相手を探しています..."
-                 kind="waiting"
-                />
-            );
+            message = "対戦相手を探しています..."
+            kind = "waiting"
         }
 
-        this.ready();
+        if(this.state.color) {
+            this.ready();
+            message = "対戦相手を見つけました。"
+            kind = "normal"
+        }
 
         return (
-            <Dialog
-                message="対戦相手が見つかりました"
-                kind="normal"
-            />
+            <div className="entry">
+                
+                <Dialog
+                 className="entry__dialog"
+                 kind={kind}
+                 message={message}
+                />
+                
+                <Button
+                 className="entry__button -cancel"
+                 value="キャンセル"
+                 onClick={() => this.cancel()}
+                />
+
+            </div>
         );
     }
 }

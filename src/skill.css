@@ -1,0 +1,62 @@
+.skill {
+  width: 300px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.skill__header {
+  height: 30px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.skill__header::before {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 30px;
+  background: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.skill__title {
+  font-size: 18px;
+  line-height: 30px;
+  position: absolute;
+  left: 18px;
+  top: 0;
+}
+
+.skill__card {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  border: 1px solid #000;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.skill__card .name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid #000;
+  margin: 12px;
+}
+
+.skill__card .description {
+  width: calc(100% - 108px);
+  height: 72px;
+  text-align: left;
+  margin: 12px;
+  margin-left: 0;
+  font-size: 12px;
+}
