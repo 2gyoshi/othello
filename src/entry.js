@@ -3,7 +3,7 @@ import Dialog from './dialog.js';
 import Button from './button.js';
 import './entry.css';
 
-const MODE = 'develop';
+const MODE = 'product';
 
 class Entry extends React.Component {
     constructor(props) {
@@ -13,6 +13,12 @@ class Entry extends React.Component {
     }
 
     init() {
+        // ブラウザバックを禁止する
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', (e) => {
+          window.history.go(1);
+        });
+
         const max = 99999;
         const min = 10000;
         this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
@@ -21,7 +27,7 @@ class Entry extends React.Component {
         const socket = window.io.connect(window.location.host);
 
         // サーバーにデータを送信する
-        socket.emit('login', this.id);
+        socket.emit('entry', this.id);
         
         if(MODE === 'develop') {
             return setTimeout(() => {
@@ -33,7 +39,7 @@ class Entry extends React.Component {
         }
 
         // サーバーからデータを受信する
-        socket.on('message', msg => this.recieve(msg));
+        socket.on('roomIdFromServer', msg => this.recieve(msg));
     }
 
     recieve(data) {
@@ -45,7 +51,8 @@ class Entry extends React.Component {
 
     cancel() {
         const socket = window.io.connect(window.location.host);
-        socket.emit('disconnect', this.id);
+        socket.emit('exit', this.id);
+
         this.props.history.push('/work/othello');
     }
 
@@ -56,8 +63,9 @@ class Entry extends React.Component {
     }
 
     start() {
-        const skill = this.props.location.state.skill;
+        const socket = window.io.connect(window.location.host);
 
+        const skill = this.props.location.state.skill;
         const data = {
             id: this.id,
             roomId: this.state.roomId,
@@ -81,7 +89,7 @@ class Entry extends React.Component {
 
         if(this.state.color) {
             this.ready();
-            message = "対戦相手を見つけました。"
+            message = "対戦相手が見つかりました。"
             kind = "normal"
         }
 

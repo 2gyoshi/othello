@@ -10,7 +10,6 @@ class Result extends React.Component {
     }
 
     render() {
-        console.log(this.props.location)
         const playerId = this.props.location.state.playerId;
         const surrenderId = this.props.location.state.surrenderId;
         const squares = this.props.location.state.history.slice(-1)[0];

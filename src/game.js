@@ -18,10 +18,10 @@ class Game extends React.Component {
         this.initSocket();
 
         const squares = Array(64).fill(null);
-        squares[27] = CONFIG.whiteStone;
-        squares[28] = CONFIG.blackStone;
-        squares[35] = CONFIG.blackStone;
-        squares[36] = CONFIG.whiteStone;
+        squares[27] = CONFIG.blackStone;
+        squares[28] = CONFIG.whiteStone;
+        squares[35] = CONFIG.whiteStone;
+        squares[36] = CONFIG.blackStone;
 
         const color = this.props.location.state.color;
         const skill = this.props.location.state.skill;
@@ -132,7 +132,6 @@ class Game extends React.Component {
         }
 
         if(this.state.skill === 'double') {
-            console.log(this.state.history.length);
             if(this.state.history.length < 5) return;
             next = this.state.xIsNext; 
             squares = this.getReversedSquares(i);
@@ -163,10 +162,15 @@ class Game extends React.Component {
     }
 
     confirm() {
-        console.log('confirm')
         this.setState({
             gameState: 'confirm',
         })
+    }
+
+    continue() {
+        this.setState({
+            gameState: 'playing',
+        });
     }
 
     surrender() {
@@ -174,18 +178,17 @@ class Game extends React.Component {
         socket.emit('surrender', this.id);
     }
 
-    continue() {
-        console.log('continue')
-        this.setState({
-            gameState: 'playing',
-        });
+    ready() {
+        setTimeout(() => {
+            this.end();
+        }, 1000);
     }
 
     end(surrenderId) {
         const data = {
             playerId: this.id, 
             surrenderId: surrenderId,
-            myColor: this.color,
+            myColor: this.state.color,
             history: this.state.history,
         };
 
@@ -206,7 +209,7 @@ class Game extends React.Component {
         const p2 = this.state.color === 'black' ? 'white' : 'black';
         const count = getStoneCount(squares);
 
-        if(turn === null) return this.end();
+        if(turn === null) this.ready();
 
         return (
             <div className="game">
@@ -242,8 +245,8 @@ class Game extends React.Component {
 
                 <Confirm
                  viewState={this.state.gameState === 'confirm' ? 'show' : 'hidden'}
-                 onClickOK={this.surrender.bind(this)}
-                 onClickCancel={this.continue.bind(this)}
+                 onClickOK={() => this.surrender()}
+                 onClickCancel={() => this.continue()}
                 />
 
             </div>
