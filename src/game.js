@@ -1,13 +1,15 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag } from "@fortawesome/free-regular-svg-icons";
-
 import CONFIG from './config.js';
 import Board from './board.js';
 import GameInfo from './game-info.js'
 import SkillButton from './toggle.js';
 import Stone from './stone.js';
-import './game.css'
+import './common.css';
+import './game.css';
+
+const MODE = 'develop';
 
 class Game extends React.Component {
     constructor(props) {
@@ -66,6 +68,19 @@ class Game extends React.Component {
     }
 
     handleClick(i) {
+        if(MODE === 'develop') {
+            const data = {
+                playerId: this.id, 
+                surrenderId: '',
+                myColor: this.state.color,
+                history: this.state.history,
+            };
+            this.props.history.push({
+                state: data,
+                pathname: '/work/othello/result',
+            });
+        }
+        
         const squares = this.state.squares.slice();
 
         const turn = getTurn(this.state.xIsNext, squares);

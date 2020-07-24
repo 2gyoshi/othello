@@ -17,8 +17,13 @@
   height: 40px;
   font-size: 14px;
   border: 1px solid #000;
+  border-bottom: 3px solid #000;
   position: absolute;
   left: 50%;
   bottom: 20%;
   transform: translateX(-50%);
+}
+
+.result__button:active {
+  border-bottom: 1px solid #000;
 }

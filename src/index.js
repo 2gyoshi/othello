@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Routing from './routing.js'
+import Routing from './routing.js';
+import './common.css';
 import './index.css';
 
  class Index extends React.Component {
     onClickEntryBtn() {
-        this.props.history.push('/work/othello/entry');
+        this.props.history.push('/work/othello/skill');
     }
     
     onClickFriendBtn() {
@@ -17,7 +18,7 @@ import './index.css';
             <div className="index">
                 <header className="index__header">
                     <h1 className="index__title">
-                        もはやオセロではない
+                        NOTHELLO
                     </h1>
                 </header>
                 <div className="index__button-area">

@@ -13,9 +13,9 @@ export default class Routing extends React.Component {
             <Router>
                 <Switch>
                     <Route exact path="/work/othello" component={Index} />
-                    <Route exact path="/work/othello/entry" component={Skill} />
+                    <Route exact path="/work/othello/skill" component={Skill} />
                     <Route exact path="/work/othello/friend" component={Skill} />
-                    <Route exact path="/work/othello/match" component={Entry} />
+                    <Route exact path="/work/othello/entry" component={Entry} />
                     <Route exact path="/work/othello/game" component={Game} />
                     <Route exact path="/work/othello/result" component={Result} />
                 </Switch>

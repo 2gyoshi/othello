@@ -1,7 +1,7 @@
 import React from 'react';
 import CONFIG from './config.js';
-import Stone from './stone.js';
 import Button from './button.js';
+import './common.css';
 import './result.css'
 
 class Result extends React.Component {

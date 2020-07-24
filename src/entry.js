@@ -1,9 +1,10 @@
 import React from 'react';
 import Dialog from './dialog.js';
 import Button from './button.js';
+import './common.css';
 import './entry.css';
 
-const MODE = 'product';
+const MODE = 'develop';
 
 class Entry extends React.Component {
     constructor(props) {
@@ -63,8 +64,6 @@ class Entry extends React.Component {
     }
 
     start() {
-        const socket = window.io.connect(window.location.host);
-
         const skill = this.props.location.state.skill;
         const data = {
             id: this.id,

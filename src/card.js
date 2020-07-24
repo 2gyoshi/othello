@@ -5,8 +5,9 @@ class Card extends React.Component {
         return (
             <button className={this.props.className}
              onClick={this.props.onClick}>
-                <span className="name">
-                    {this.props.data.name}
+                <span className="thumbnail">
+                    <span className="icon">{this.props.thumbnail}</span>
+                    <span className="name">{this.props.data.name}</span>
                 </span>
                 <p className="description">
                     {this.props.data.description}
