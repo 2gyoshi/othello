@@ -2,7 +2,7 @@ import React from 'react';
 
 function Stone(props) {
     return (
-        <div className={`stone ${props.color}`}>
+        <div className={props.className}>
             {props.count}
         </div>
     );

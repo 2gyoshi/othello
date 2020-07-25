@@ -1,13 +1,16 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag } from "@fortawesome/free-regular-svg-icons";
-
+import { faStar } from "@fortawesome/free-regular-svg-icons";
 import CONFIG from './config.js';
 import Board from './board.js';
 import GameInfo from './game-info.js'
-import SkillButton from './toggle.js';
+import Button from './button.js';
 import Stone from './stone.js';
-import './game.css'
+import './common.css';
+import './game.css';
+
+const MODE = 'develop';
 
 class Game extends React.Component {
     constructor(props) {
@@ -66,6 +69,19 @@ class Game extends React.Component {
     }
 
     handleClick(i) {
+        if(MODE === 'develop') {
+            const data = {
+                playerId: this.id, 
+                surrenderId: '',
+                myColor: this.state.color,
+                history: this.state.history,
+            };
+            this.props.history.push({
+                state: data,
+                pathname: '/work/othello/result',
+            });
+        }
+        
         const squares = this.state.squares.slice();
 
         const turn = getTurn(this.state.xIsNext, squares);
@@ -205,7 +221,7 @@ class Game extends React.Component {
         let enableSquares = getEnableSquares(this.state.color, squares);
         if(this.state.color !== turn) enableSquares = [];
 
-        const p1 = this.state.color;
+        const p1 = this.state.isSpMode ? 'colorfull' : this.state.color;
         const p2 = this.state.color === 'black' ? 'white' : 'black';
         const count = getStoneCount(squares);
 
@@ -216,7 +232,10 @@ class Game extends React.Component {
                 <div className="game-board">
                     <GameInfo side="opponent">
                         <div className="name">Player2</div>
-                        <Stone color={p2} count={count[p2]} />
+                        <Stone
+                         className={`stone ${p2}`}
+                         count={count[p2]}
+                        />
                     </GameInfo>
 
                     <Board 
@@ -226,14 +245,21 @@ class Game extends React.Component {
                     />
 
                     <GameInfo side="player">
-                        <Stone color={p1} count={count[p1]} />
+                        <Stone
+                         className={`stone ${p1}`}
+                         count={count[this.state.color]}
+                        />
                         <div className="name">Player1</div>
-                        <SkillButton
-                         mode={this.state.isSpMode ? 'special' : 'normal'}
-                         value={this.state.skill}
+                        <Button
+                         className="game__button -skill"
+                         value={<FontAwesomeIcon icon={faStar}/>}
                          onClick={() => this.toggleMode()}
                         />
-                        <Surrender onClick={() => this.confirm()} />
+                        <Button
+                         className="game__button -surrender"
+                         value={<FontAwesomeIcon icon={faFlag}/>}
+                         onClick={() => this.confirm()}
+                        />
                     </GameInfo>
 
                 </div>
@@ -280,24 +306,6 @@ function Layer(props) {
     return (
         <div className={`${props.className} ${'-' + props.viewState}`} />
     )
-}
-
-function Button(props) {
-    return(
-        <button className={props.className} onClick={props.onClick}>
-            {props.value}
-        </button>
-    );
-}
-
-function Surrender(props) {
-    return (
-        <Button
-         value={<FontAwesomeIcon icon={faFlag}/>}
-         className="game__button -surrender"
-         onClick={() => props.onClick()}
-        />
-    );
 }
 
 function getTurn(isBlackTurn, squares) {

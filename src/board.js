@@ -1,15 +1,33 @@
 import React from 'react';
 import Square from './square.js';
+import Stone from './stone.js';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimesCircle } from "@fortawesome/free-regular-svg-icons";
 
-export default class Board extends React.Component {
-    renderSquare(i) {
+
+class Board extends React.Component {
+    renderStone(i) {
+        if(this.props.enableSquares.includes(i) === true) {
+            return <div className="enable"/>
+        }
+
+        if(this.props.squares[i] === 'block') {
+            return <FontAwesomeIcon className="block" icon={faTimesCircle} />
+        }
+
+        if(this.props.squares[i] === null) return null;
+
         return (
-            <Square
-             value={this.props.squares[i]}
-             onClick={() => this.props.onClick(i)}
-             enable={this.props.enableSquares.includes(i) ? 'enable' : ''}
-             key={i}
-            />
+            <Stone className={`stone ${this.props.squares[i]}`} />
+        );
+    }
+
+    renderSquare(i) {
+        const child = this.renderStone(i);
+        return (
+            <Square key={i} className="square" onClick={() => this.props.onClick(i)}>
+                {child}
+            </Square>
         );
     }
 
@@ -33,3 +51,5 @@ export default class Board extends React.Component {
         );
     }
 }
+
+export default Board;

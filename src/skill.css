@@ -42,21 +42,37 @@
   margin-bottom: 24px;
 }
 
-.skill__card .name {
+.skill__card .thumbnail {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 72px;
   height: 72px;
   border: 1px solid #000;
   margin: 12px;
+  position: relative;
 }
 
 .skill__card .description {
   width: calc(100% - 108px);
   height: 72px;
+  font-size: 12px;
   text-align: left;
   margin: 12px;
   margin-left: 0;
-  font-size: 12px;
+}
+
+.thumbnail .icon {
+  font-size: 32px;
+  font-weight: 700;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.thumbnail .name {
+  position: absolute;
+  bottom: 0;
 }

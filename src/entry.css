@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 220px;
+  width: 250px;
   font-size: 14px;
   border-radius: 5px;
   border: 1px solid #000;
@@ -18,35 +18,23 @@
   transform: translate(-50%, -50%);
 }
 
-.entry__button.-home {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid #000;
-  position: absolute;
-  right: 24px;
-  bottom: 20%;
-}
-
-.entry__home {
-  font-size: 18px;
-}
-
 .entry__button.-cancel {
   width: 100px;
   height: 40px;
-  border: 1px solid #000;
   font-size: 12px;
   position: absolute;
   left: 50%;
   bottom: 20%;
   transform: translateX(-50%);
+  border: 1px solid #000;
+  border-bottom: 3px solid #000;
+}
+
+.index__button:active {
+  border-bottom: 1px solid #000;
 }
 
 @keyframes waiting {
-  0% {
-    opacity: 1;
-  }
   100% {
     opacity: 0.5;
   }
