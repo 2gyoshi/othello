@@ -28,8 +28,12 @@ class Entry extends React.Component {
         const socket = window.io.connect(window.location.host);
 
         // サーバーにデータを送信する
-        socket.emit('entry', this.id);
-        
+        if(!this.props.location.state.roomId) {
+            socket.emit('entry', this.id);
+        } else {
+            socket.emit('entryFriendBattle', this.props.location.state.roomId);
+        }
+
         if(MODE === 'develop') {
             return setTimeout(() => {
                 this.setState({
@@ -40,7 +44,7 @@ class Entry extends React.Component {
         }
 
         // サーバーからデータを受信する
-        socket.on('roomIdFromServer', msg => this.recieve(msg));
+        socket.on('matchingSuccess', msg => this.recieve(msg));
     }
 
     recieve(data) {

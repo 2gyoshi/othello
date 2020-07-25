@@ -1,0 +1,36 @@
+.confirm {
+  width: 300px;
+  height: 150px;
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #000;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.confirm__message {
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+}
+
+.confirm__button.-ok,
+.confirm__button.-cancel {
+  width: 80px;
+  height: 30px;
+}
+
+.confirm__button.-ok {
+  background: #eee;
+  position: absolute;
+  left: 58px;
+  bottom: 24px;
+}
+
+.confirm__button.-cancel {
+  position: absolute;
+  right: 58px;
+  bottom: 24px;
+}

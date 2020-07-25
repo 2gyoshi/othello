@@ -1,0 +1,63 @@
+.friend {
+  width: 100%;
+  height: 100%;
+}
+
+.friend__form {
+  width: 300px;
+  height: 170px;
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #000;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.friend__textbox {
+    width: 200px;
+    margin: 0 auto;
+}
+
+.friend__label {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.friend__warning {
+    height: 15px;
+    font-size: 10px;
+    color: #f44336;
+}
+
+.friend__input {
+    width: 100%;
+    height: 30px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.friend__button-area {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+}
+
+.friend__button.-ok,
+.friend__button.-cancel {
+  width: 80px;
+  height: 30px;
+}
+
+.friend__button.-ok {
+  background: #eee;
+}
+  
+.friend__button.-cancel {
+}

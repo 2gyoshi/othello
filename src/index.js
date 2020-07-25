@@ -25,12 +25,12 @@ import './index.css';
                     <button
                      className="index__button"
                      onClick={this.onClickEntryBtn.bind(this)}>
-                        対戦
+                        フリー対戦
                     </button>
                     <button
                      className="index__button"
                      onClick={this.onClickFriendBtn.bind(this)}>
-                        友達と対戦
+                        フレンド対戦
                     </button>
                 </div>  
             </div>

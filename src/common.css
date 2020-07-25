@@ -5,16 +5,12 @@
   padding: 0;
 }
 
-button {
-  font-size: 100%;
-  background: #fff;
+input {
   appearance: none;
-  border: none;
-  cursor: pointer;
   border: 1px solid #000;
 }
 
-button:focus {
+input:focus {
   outline: none;
 }
 

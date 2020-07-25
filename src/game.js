@@ -7,6 +7,7 @@ import Board from './board.js';
 import GameInfo from './game-info.js'
 import Button from './button.js';
 import Stone from './stone.js';
+import Confirm from './confirm.js';
 import './common.css';
 import './game.css';
 
@@ -270,6 +271,7 @@ class Game extends React.Component {
                 />
 
                 <Confirm
+                 message="本当に降参しますか？"
                  viewState={this.state.gameState === 'confirm' ? 'show' : 'hidden'}
                  onClickOK={() => this.surrender()}
                  onClickCancel={() => this.continue()}
@@ -281,26 +283,6 @@ class Game extends React.Component {
 }
 
 export default Game;
-
-function Confirm(props) {
-    return(
-        <div className={`game__confirm ${'-' + props.viewState}`}>
-            <p class="game__message">
-                降参しますか？
-            </p>
-            <Button 
-             value="OK"
-             className="game__button -ok"
-             onClick={props.onClickOK}
-            />
-            <Button 
-             value="Cancel"
-             className="game__button -cancel"
-             onClick={props.onClickCancel}
-            />
-        </div>
-    );
-}
 
 function Layer(props) {
     return (

@@ -10,14 +10,18 @@ import './skill.css'
 class Skill extends React.Component {
     constructor(props) {
         super(props);
-
         this.reverse = CONFIG.skill.reverse;
         this.double  = CONFIG.skill.double;
         this.block   = CONFIG.skill.block;
     }
 
     onClickCard(skill) {
-        const data = {skill: skill.name};
+        console.log(this.props.location)
+        const data = {
+            skill: skill.name, 
+            roomId: this.props.location.state.roomId,
+        };
+
         this.props.history.push({
             pathname: '/work/othello/entry',
             state: data,

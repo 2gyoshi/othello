@@ -16,7 +16,7 @@ io.sockets.on('connection', function(socket) {
     const waiting = [];
     for (const id of Object.keys(players)) {
       const p = players[id];
-      if (p.state === 'waiting') {
+      if (p.roomId === '' && p.state === 'waiting') {
         waiting.push({
           playerId: id,
           roomId: p.roomId
@@ -41,9 +41,39 @@ io.sockets.on('connection', function(socket) {
     const colors = divideColor([playerId, opponentId]);
 
     const data = { color: colors, roomId: roomId };
-    io.to(roomId).emit('roomIdFromServer', data);
+    io.to(roomId).emit('matchingSuccess', data);
 
     players[playerId].state = 'playing';
+    players[opponentId].state = 'playing';
+  });
+
+  socket.on('entryFriendBattle', function(data) {
+    players[data.playerId] = {
+      roomId: data.roomId,
+      state: 'waiting',
+    };
+
+    socket.join(data.roomId);
+
+    const waiting = [];
+    for (const id of Object.keys(players)) {
+      const p = players[id];
+      if (p.roomId === data.roomId && p.state === 'waiting') {
+        waiting.push({
+          playerId: id,
+        });
+      }
+    }
+
+    if(waiting.length < 2) return;
+
+    const opponentId = waiting[0].playerId;
+    const colors = divideColor([data.playerId, opponentId]);
+
+    const dataFromServer = { color: colors, roomId: data.roomId };
+    io.to(data.roomId).emit('matchingSuccess', dataFromServer);
+
+    players[data.playerId].state = 'playing';
     players[opponentId].state = 'playing';
   });
 
