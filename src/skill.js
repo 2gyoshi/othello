@@ -2,7 +2,6 @@ import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { faTimesCircle } from "@fortawesome/free-regular-svg-icons";
-
 import Card from './card';
 import CONFIG from './config.js';
 import './skill.css'
@@ -16,10 +15,10 @@ class Skill extends React.Component {
     }
 
     onClickCard(skill) {
-        console.log(this.props.location)
+        const roomId = this.props.location.state;
         const data = {
             skill: skill.name, 
-            roomId: this.props.location.state.roomId,
+            roomId: roomId,
         };
 
         this.props.history.push({

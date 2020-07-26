@@ -20,10 +20,9 @@ class Friend extends React.Component {
             return;
         }
 
-        const data = {roomId: this.state.code}
         this.props.history.push({
             pathname: '/work/othello/skill',
-            state: data,
+            state: this.state.code,
         });
     }
     

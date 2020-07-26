@@ -1,80 +1,82 @@
 const socketIO = require('socket.io');
 const io = socketIO.listen(3000);
 
-const players = {};
+let players = [];
 
-// event that clietns connect
 io.sockets.on('connection', function(socket) {
   console.log('connection');
 
   socket.on('entry', function(playerId) {
-    players[playerId] = {
+    const player = {
+      playerId: playerId,
       roomId: '',
+      kind: 'free',
       state: 'waiting',
     };
 
     const waiting = [];
-    for (const id of Object.keys(players)) {
-      const p = players[id];
-      if (p.roomId === '' && p.state === 'waiting') {
-        waiting.push({
-          playerId: id,
-          roomId: p.roomId
-        });
-      }
+
+    for (const p of players) {
+      if (p.kind === 'friend') continue;
+      if (p.state !== 'waiting') continue;
+      waiting.push(p);
     }
 
-    if (waiting.length < 2) {
+    if (waiting.length < 1) {
       const roomId = String(getRoomId());
-      players[playerId].roomId = roomId;
+	    
+      player.roomId = roomId;
+      players.push(player);
+
       socket.join(roomId);
 
       return;
     }
 
-    const opponentId = waiting[0].playerId;
+    const opponent = waiting[0];
+    const opponentId = opponent.playerId;
+    const roomId = opponent.roomId;
 
-    const roomId = waiting[0].roomId;
-    players[playerId].roomId = roomId;
+    player.roomId = roomId;
+    players.push(player);
+
     socket.join(roomId);
 
-    const colors = divideColor([playerId, opponentId]);
-
+    const colors = divideColor(playerId, opponentId);
     const data = { color: colors, roomId: roomId };
     io.to(roomId).emit('matchingSuccess', data);
 
-    players[playerId].state = 'playing';
-    players[opponentId].state = 'playing';
+    player.state = 'playing';
+    opponent.state = 'playing';
   });
 
   socket.on('entryFriendBattle', function(data) {
-    players[data.playerId] = {
+    const player = {
+      playerId: data.playerId,
       roomId: data.roomId,
+      kind: 'friend',
       state: 'waiting',
     };
 
+    players.push(player);
     socket.join(data.roomId);
 
-    const waiting = [];
-    for (const id of Object.keys(players)) {
-      const p = players[id];
-      if (p.roomId === data.roomId && p.state === 'waiting') {
-        waiting.push({
-          playerId: id,
-        });
-      }
+    const room = io.sockets.adapter.rooms[data.roomId];
+    if(room.length < 2) return;
+
+    let opponent = {};
+    for (const p of players) {
+      if (p.roomId !== data.roomId) continue;
+      if (p.playerId === data.playerId) continue;
+      opponent = p;
     }
 
-    if(waiting.length < 2) return;
-
-    const opponentId = waiting[0].playerId;
-    const colors = divideColor([data.playerId, opponentId]);
-
+    const colors = divideColor(data.playerId, opponent.playerId);
     const dataFromServer = { color: colors, roomId: data.roomId };
     io.to(data.roomId).emit('matchingSuccess', dataFromServer);
 
-    players[data.playerId].state = 'playing';
-    players[opponentId].state = 'playing';
+    player.state = 'playing';
+    opponent.state = 'playing';
   });
 
   socket.on('enter', function(roomId) {
@@ -82,40 +84,43 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('exit', function(playerId) {
-    const roomId = players[playerId]['roomId'];
+    const player = players.find(e => e.playerId === playerId);
+
+    if(!player) return;
+
+    const roomId = player.roomId;
+
     socket.leave(roomId);
-    delete players[playerId];
+
+    players = players.filter(e => e.playerId !== playerId);
   });
 
-  // event when recieving messages
-  socket.on('message', function(msg) {
-    const data = JSON.parse(msg);
-    const roomId = players[data.id]['roomId'];
-    io.to(roomId).emit('message', msg);
+  socket.on('message', function(data) {
+    const player = players.find(e => e.playerId === data.playerId);
+    const roomId = player.roomId;
+    io.to(roomId).emit('message', data);
   });
 
   socket.on('surrender', function(playerId) {
-    const roomId = players[playerId]['roomId'];
+    const player = players.find(e => e.playerId === playerId);
+    const roomId = player.roomId;
     io.to(roomId).emit('surrender', playerId);
   });
 
-  // event that clients disconnect
-  socket.on('disconnect', function(playerId) {
+  socket.on('disconnect', function() {
     console.log('disconnect');
   });
 });
 
-function divideColor(players) {
+function divideColor(playerId1, playerId2) {
   const result = {};
-  const player1 = players[0];
-  const player2 = players[1];
   const rand = getRandom(0, 1);
   if(rand === 0) {
-    result[player1] = 'black';
-    result[player2] = 'white';
+    result[playerId1] = 'black';
+    result[playerId2] = 'white';
   } else {
-    result[player1] = 'white';
-    result[player2] = 'black';
+    result[playerId1] = 'white';
+    result[playerId2] = 'black';
   }
 
   return result;

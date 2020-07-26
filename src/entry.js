@@ -4,7 +4,7 @@ import Button from './button.js';
 import './common.css';
 import './entry.css';
 
-const MODE = 'develop';
+const MODE = 'product';
 
 class Entry extends React.Component {
     constructor(props) {
@@ -31,7 +31,11 @@ class Entry extends React.Component {
         if(!this.props.location.state.roomId) {
             socket.emit('entry', this.id);
         } else {
-            socket.emit('entryFriendBattle', this.props.location.state.roomId);
+            const data = {
+                playerId: this.id,
+                roomId: this.props.location.state.roomId,
+            };
+            socket.emit('entryFriendBattle', data);
         }
 
         if(MODE === 'develop') {

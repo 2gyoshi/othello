@@ -11,7 +11,7 @@ import Confirm from './confirm.js';
 import './common.css';
 import './game.css';
 
-const MODE = 'develop';
+const MODE = 'product';
 
 class Game extends React.Component {
     constructor(props) {
@@ -22,10 +22,10 @@ class Game extends React.Component {
         this.initSocket();
 
         const squares = Array(64).fill(null);
-        squares[27] = CONFIG.blackStone;
-        squares[28] = CONFIG.whiteStone;
-        squares[35] = CONFIG.whiteStone;
-        squares[36] = CONFIG.blackStone;
+        squares[27] = CONFIG.whiteStone;
+        squares[28] = CONFIG.blackStone;
+        squares[35] = CONFIG.blackStone;
+        squares[36] = CONFIG.whiteStone;
 
         const color = this.props.location.state.color;
         const skill = this.props.location.state.skill;
@@ -49,7 +49,7 @@ class Game extends React.Component {
         socket.emit('enter', this.roomId);
 
         // サーバーからデータを受信する
-        socket.on('message', msg => this.recieve(msg));
+        socket.on('message', data => this.recieve(data));
 
         // サレンダーの発生を検知する
         socket.on('surrender', id => this.end(id))
@@ -57,11 +57,10 @@ class Game extends React.Component {
 
     send(data) {
         const socket = window.io.connect(window.location.host);
-        socket.emit('message', JSON.stringify(data));
+        socket.emit('message', data);
     }
 
-    recieve(msg) {
-        const data = JSON.parse(msg);
+    recieve(data) {
         this.setState({
             squares: data.squares,
             xIsNext: data.xIsNext,
@@ -106,7 +105,7 @@ class Game extends React.Component {
         });
 
         this.send({
-            id: this.id,
+            playerId: this.id,
             squares: processed,
             xIsNext: next,
             history: history,
@@ -171,7 +170,7 @@ class Game extends React.Component {
         });
 
         this.send({
-            id: this.id,
+            playerId: this.id,
             squares: squares,
             xIsNext: next,
             history: history,
@@ -202,6 +201,9 @@ class Game extends React.Component {
     }
 
     end(surrenderId) {
+        const socket = window.io.connect(window.location.host);
+        socket.emit('exit', this.id);
+
         const data = {
             playerId: this.id, 
             surrenderId: surrenderId,
