@@ -4,12 +4,14 @@ import Button from './button.js';
 import './common.css';
 import './entry.css';
 
+import Websocket from './websocket.js';
+
 const MODE = 'product';
 
 class Entry extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { color: '', roomId: '' };
+        this.state = { color: '' };
         this.init();
     }
 
@@ -20,46 +22,40 @@ class Entry extends React.Component {
           window.history.go(1);
         });
 
-        const max = 99999;
-        const min = 10000;
-        this.id = Math.floor( Math.random() * (max + 1 - min) ) + min;
-
         // socket.io に接続する
-        const socket = window.io.connect(window.location.host);
+        const socket = Websocket.getSocket();
+
+	this.id = socket.id;
+	this.roomId = this.props.location.state.roomId;
 
         // サーバーにデータを送信する
-        if(!this.props.location.state.roomId) {
-            socket.emit('entry', this.id);
+        if(!this.roomId) {
+            socket.emit('entry');
         } else {
-            const data = {
-                playerId: this.id,
-                roomId: this.props.location.state.roomId,
-            };
-            socket.emit('entryFriendBattle', data);
+            socket.emit('entryForFriend', this.roomId);
         }
 
         if(MODE === 'develop') {
             return setTimeout(() => {
                 this.setState({
                     color: 'black',
-                    roomId: 'test',
                 });
             }, 1000);
         }
 
         // サーバーからデータを受信する
-        socket.on('matchingSuccess', msg => this.recieve(msg));
+        socket.on('success', data => this.recieve(data));
     }
 
     recieve(data) {
+	this.roomId = data.roomId;
         this.setState({
-            color: data.color[this.id],
-            roomId: data.roomId,
+            color: data.colors[this.id],
         });
     }
 
     cancel() {
-        const socket = window.io.connect(window.location.host);
+        const socket = Websocket.getSocket();
         socket.emit('exit', this.id);
 
         this.props.history.push('/work/othello');
@@ -73,9 +69,10 @@ class Entry extends React.Component {
 
     start() {
         const skill = this.props.location.state.skill;
+
         const data = {
             id: this.id,
-            roomId: this.state.roomId,
+	    roomId: this.roomId,
             color: this.state.color,
             skill: skill,
         }

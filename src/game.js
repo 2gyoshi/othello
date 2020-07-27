@@ -11,6 +11,8 @@ import Confirm from './confirm.js';
 import './common.css';
 import './game.css';
 
+import Websocket from './websocket.js'
+
 const MODE = 'product';
 
 class Game extends React.Component {
@@ -43,20 +45,17 @@ class Game extends React.Component {
     }
     
     initSocket() {
-        const socket = window.io.connect(window.location.host);
-
-        // サーバールームに入る
-        socket.emit('enter', this.roomId);
+	const socket = Websocket.getSocket();
 
         // サーバーからデータを受信する
         socket.on('message', data => this.recieve(data));
 
         // サレンダーの発生を検知する
-        socket.on('surrender', id => this.end(id))
+        socket.on('surrender', surrenderId => this.stop(surrenderId))
     }
 
     send(data) {
-        const socket = window.io.connect(window.location.host);
+	const socket = Websocket.getSocket();
         socket.emit('message', data);
     }
 
@@ -106,6 +105,7 @@ class Game extends React.Component {
 
         this.send({
             playerId: this.id,
+	    roomId: this.roomId,
             squares: processed,
             xIsNext: next,
             history: history,
@@ -171,6 +171,7 @@ class Game extends React.Component {
 
         this.send({
             playerId: this.id,
+	    roomId: this.roomId,
             squares: squares,
             xIsNext: next,
             history: history,
@@ -190,18 +191,22 @@ class Game extends React.Component {
     }
 
     surrender() {
-        const socket = window.io.connect(window.location.host);
-        socket.emit('surrender', this.id);
+	const socket = Websocket.getSocket();
+        const data = {
+            surrenderId: this.id,
+	    roomId: this.roomId,
+        };
+        socket.emit('surrender', data);
     }
 
     ready() {
         setTimeout(() => {
-            this.end();
+            this.stop();
         }, 1000);
     }
 
-    end(surrenderId) {
-        const socket = window.io.connect(window.location.host);
+    stop(surrenderId) {
+	const socket = Websocket.getSocket();
         socket.emit('exit', this.id);
 
         const data = {
