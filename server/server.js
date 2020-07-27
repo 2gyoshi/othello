@@ -1,110 +1,118 @@
 const socketIO = require('socket.io');
 const io = socketIO.listen(3000);
 
-let players = [];
+const FREEMODE   = 'free';
+const FRIENDMODE = 'friend';
+const WAITING = 'waiting';
+const PLAYING = 'playing';
+
+class Player {
+  constructor(id, roomId) {
+    this.id = id;
+    this.roomId = roomId;
+  }
+  setRoomId(roomId) {
+    this.roomId = roomId;
+  }
+  getRoomId() {
+    return this.roomId;
+  }
+}
+
+class PlayerList {
+  constructor() {
+    this.items = new Array();
+  }
+  add(item) {
+    this.items.push(item);
+  }
+  remove(item) {
+    this.items = this.items.filter(e => e !== item);
+  }
+  size() {
+    return this.items.length;
+  }
+  getItems() {
+    return this.items;
+  }
+  getItemByRoomId(roomId) {
+    return this.items.filter(e => e.getRoomId() === roomId);
+  }
+}
+
+const waitingPlayerList = new PlayerList();
+const waitingPlayerListForFriend = new PlayerList();
 
 io.sockets.on('connection', function(socket) {
   console.log('connection');
 
-  socket.on('entry', function(playerId) {
-    const player = {
-      playerId: playerId,
-      roomId: '',
-      kind: 'free',
-      state: 'waiting',
-    };
+  socket.on('entry', function() {
+    const playerList = waitingPlayerListForFriend;
 
-    const waiting = [];
+    const player = new Player(socket.id);
+    playerList.add(player);
 
-    for (const p of players) {
-      if (p.kind === 'friend') continue;
-      if (p.state !== 'waiting') continue;
-      waiting.push(p);
-    }
+    const waiting = playerList.getItems();
 
-    if (waiting.length < 1) {
+    // プレイヤーが人数に満たない場合は入室して待機する
+    if (waiting.length < 2) {
       const roomId = String(getRoomId());
-	    
-      player.roomId = roomId;
-      players.push(player);
-
+      player.setRoomId(roomId);
       socket.join(roomId);
 
       return;
     }
 
+    // 待機中の部屋に入室する
     const opponent = waiting[0];
-    const opponentId = opponent.playerId;
-    const roomId = opponent.roomId;
 
-    player.roomId = roomId;
-    players.push(player);
-
+    const roomId = opponent.getRoomId();
+    player.setRoomId(roomId);
     socket.join(roomId);
 
-    const colors = divideColor(playerId, opponentId);
-    const data = { color: colors, roomId: roomId };
-    io.to(roomId).emit('matchingSuccess', data);
+    // プレイヤーに石の色を振り分ける
+    const colors = divideColor(player.id, opponent.id);
 
-    player.state = 'playing';
-    opponent.state = 'playing';
+    // クライアントに通知する
+    io.to(roomId).emit('success', {roomId: roomId, colors: colors});
+
+    playerList.remove(player);
+    playerList.remove(opponent);
   });
 
-  socket.on('entryFriendBattle', function(data) {
-    const player = {
-      playerId: data.playerId,
-      roomId: data.roomId,
-      kind: 'friend',
-      state: 'waiting',
-    };
+  socket.on('entryForFriend', function(roomId) {
+    const playerList = waitingPlayerListForFriend;
 
-    players.push(player);
-    socket.join(data.roomId);
-
-    const room = io.sockets.adapter.rooms[data.roomId];
-    if(room.length < 2) return;
-
-    let opponent = {};
-    for (const p of players) {
-      if (p.roomId !== data.roomId) continue;
-      if (p.playerId === data.playerId) continue;
-      opponent = p;
-    }
-
-    const colors = divideColor(data.playerId, opponent.playerId);
-    const dataFromServer = { color: colors, roomId: data.roomId };
-    io.to(data.roomId).emit('matchingSuccess', dataFromServer);
-
-    player.state = 'playing';
-    opponent.state = 'playing';
-  });
-
-  socket.on('enter', function(roomId) {
+    const player = new Player(socket.id, roomId);
+    playerList.add(player);
     socket.join(roomId);
+
+    const waiting = playerList.getItemByRoomId(roomId);
+
+    if (waiting.length < 2) return;
+
+    const opponent = waiting[0];
+
+    // プレイヤーに石の色を振り分ける
+    const colors = divideColor(player.id, opponent.id);
+
+    // クライアントに通知する
+    io.to(roomId).emit('success', {roomId: roomId, colors: colors});
+
+    playerList.remove(player);
+    playerList.remove(opponent);
   });
 
-  socket.on('exit', function(playerId) {
-    const player = players.find(e => e.playerId === playerId);
-
-    if(!player) return;
-
-    const roomId = player.roomId;
-
+  socket.on('exit', function(roomId) {
     socket.leave(roomId);
-
-    players = players.filter(e => e.playerId !== playerId);
   });
 
   socket.on('message', function(data) {
-    const player = players.find(e => e.playerId === data.playerId);
-    const roomId = player.roomId;
-    io.to(roomId).emit('message', data);
+    io.to(data.roomId).emit('message', data);
   });
 
-  socket.on('surrender', function(playerId) {
-    const player = players.find(e => e.playerId === playerId);
-    const roomId = player.roomId;
-    io.to(roomId).emit('surrender', playerId);
+  socket.on('surrender', function(data) {
+    io.to(data.roomId).emit('surrender', data.surrenderId);
   });
 
   socket.on('disconnect', function() {
