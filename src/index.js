@@ -7,13 +7,13 @@ import './index.css';
  class Index extends React.Component {
     onClickEntryBtn() {
         this.props.history.push({
-            pathname: '/work/othello/skill',
+            pathname: '/work/nothello/skill',
             state: '',
         });
     }
     
     onClickFriendBtn() {
-        this.props.history.push('/work/othello/friend');
+        this.props.history.push('/work/nothello/friend');
     }
 
     render() {

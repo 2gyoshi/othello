@@ -21,13 +21,13 @@ class Friend extends React.Component {
         }
 
         this.props.history.push({
-            pathname: '/work/othello/skill',
+            pathname: '/work/nothello/skill',
             state: this.state.code,
         });
     }
     
     onClickCancelButton() {
-        this.props.history.push('/work/othello/');
+        this.props.history.push('/work/nothello/');
     }
 
     onChangeText(e) {

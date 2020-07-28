@@ -1,10 +1,9 @@
 import React from 'react';
+import Websocket from './websocket.js';
 import Dialog from './dialog.js';
 import Button from './button.js';
 import './common.css';
 import './entry.css';
-
-import Websocket from './websocket.js';
 
 const MODE = 'product';
 
@@ -25,8 +24,8 @@ class Entry extends React.Component {
         // socket.io に接続する
         const socket = Websocket.getSocket();
 
-	this.id = socket.id;
-	this.roomId = this.props.location.state.roomId;
+        this.id = socket.id;
+        this.roomId = this.props.location.state.roomId;
 
         // サーバーにデータを送信する
         if(!this.roomId) {
@@ -48,7 +47,7 @@ class Entry extends React.Component {
     }
 
     recieve(data) {
-	this.roomId = data.roomId;
+        this.roomId = data.roomId;
         this.setState({
             color: data.colors[this.id],
         });
@@ -58,7 +57,7 @@ class Entry extends React.Component {
         const socket = Websocket.getSocket();
         socket.emit('exit', this.id);
 
-        this.props.history.push('/work/othello');
+        this.props.history.push('/work/nothello');
     }
 
     ready() {
@@ -72,14 +71,14 @@ class Entry extends React.Component {
 
         const data = {
             id: this.id,
-	    roomId: this.roomId,
+            roomId: this.roomId,
             color: this.state.color,
             skill: skill,
         }
 
         this.props.history.push({
             state: data,
-            pathname: '/work/othello/game',
+            pathname: '/work/nothello/game',
         });
     }
 

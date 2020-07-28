@@ -3,15 +3,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag } from "@fortawesome/free-regular-svg-icons";
 import { faStar } from "@fortawesome/free-regular-svg-icons";
 import CONFIG from './config.js';
-import Board from './board.js';
-import GameInfo from './game-info.js'
+import Websocket from './websocket.js'
 import Button from './button.js';
 import Stone from './stone.js';
+import Board from './board.js';
+import GameInfo from './game-info.js'
 import Confirm from './confirm.js';
 import './common.css';
 import './game.css';
 
-import Websocket from './websocket.js'
 
 const MODE = 'product';
 
@@ -45,7 +45,7 @@ class Game extends React.Component {
     }
     
     initSocket() {
-	const socket = Websocket.getSocket();
+        const socket = Websocket.getSocket();
 
         // サーバーからデータを受信する
         socket.on('message', data => this.recieve(data));
@@ -55,7 +55,7 @@ class Game extends React.Component {
     }
 
     send(data) {
-	const socket = Websocket.getSocket();
+        const socket = Websocket.getSocket();
         socket.emit('message', data);
     }
 
@@ -77,7 +77,7 @@ class Game extends React.Component {
             };
             this.props.history.push({
                 state: data,
-                pathname: '/work/othello/result',
+                pathname: '/work/nothello/result',
             });
         }
         
@@ -105,7 +105,7 @@ class Game extends React.Component {
 
         this.send({
             playerId: this.id,
-	    roomId: this.roomId,
+            roomId: this.roomId,
             squares: processed,
             xIsNext: next,
             history: history,
@@ -171,7 +171,7 @@ class Game extends React.Component {
 
         this.send({
             playerId: this.id,
-	    roomId: this.roomId,
+            roomId: this.roomId,
             squares: squares,
             xIsNext: next,
             history: history,
@@ -191,10 +191,10 @@ class Game extends React.Component {
     }
 
     surrender() {
-	const socket = Websocket.getSocket();
+        const socket = Websocket.getSocket();
         const data = {
             surrenderId: this.id,
-	    roomId: this.roomId,
+            roomId: this.roomId,
         };
         socket.emit('surrender', data);
     }
@@ -206,7 +206,7 @@ class Game extends React.Component {
     }
 
     stop(surrenderId) {
-	const socket = Websocket.getSocket();
+        const socket = Websocket.getSocket();
         socket.emit('exit', this.id);
 
         const data = {
@@ -218,7 +218,7 @@ class Game extends React.Component {
 
         this.props.history.push({
             state: data,
-            pathname: '/work/othello/result',
+            pathname: '/work/nothello/result',
         });
     }
 

@@ -22,7 +22,7 @@ class Skill extends React.Component {
         };
 
         this.props.history.push({
-            pathname: '/work/othello/entry',
+            pathname: '/work/nothello/entry',
             state: data,
         });
     }

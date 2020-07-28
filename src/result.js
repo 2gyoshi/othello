@@ -6,7 +6,7 @@ import './result.css'
 
 class Result extends React.Component {
     onClick() {
-        this.props.history.push('/work/othello')
+        this.props.history.push('/work/nothello')
     }
 
     render() {
